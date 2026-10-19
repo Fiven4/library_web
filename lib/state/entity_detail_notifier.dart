@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import '../models/author.dart';
 import '../models/book.dart';
 import '../models/book_query.dart';
 import '../repositories/book_repository.dart';
@@ -83,19 +82,21 @@ class BookDetailNotifier extends EntityDetailNotifier<Book> {
   BookDetailNotifier(super.store, super.id);
 }
 
-/// Карточка автора дополнительно загружает его книги.
-class AuthorDetailNotifier extends EntityDetailNotifier<Author> {
-  AuthorDetailNotifier(super.store, super.id, this._books);
+/// Карточка сущности, на которую ссылаются книги (автор, жанр, издательство):
+/// дополнительно загружает список связанных книг.
+class RelatedBooksNotifier<T> extends EntityDetailNotifier<T> {
+  RelatedBooksNotifier(super.store, super.id, this._books, this._queryFor);
 
   final BookRepository _books;
-  List<Book> _authorBooks = const [];
+  final BookQuery Function(int id) _queryFor;
+  List<Book> _related = const [];
 
-  List<Book> get books => _authorBooks;
+  List<Book> get books => _related;
 
   @override
   Future<void> onLoaded() async {
     if (item == null) return;
-    final page = await _books.find(BookQuery(authorId: id, size: 50));
-    _authorBooks = page.items;
+    final page = await _books.find(_queryFor(id!));
+    _related = page.items;
   }
 }

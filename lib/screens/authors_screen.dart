@@ -29,6 +29,8 @@ class AuthorsScreen extends StatelessWidget {
       emptyMessage: 'По заданным условиям авторов не найдено.',
       idOf: (a) => a.id,
       itemPath: (a) => '/authors/${a.id}',
+      createPath: '/authors/new',
+      editPath: (a) => '/authors/${a.id}/edit',
       itemTitle: (a) => 'Автор «${a.fullName}»',
       isDeleted: (a) => a.isDeleted,
       columns: [

@@ -2,14 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:library_web/models/author_query.dart';
 import 'package:library_web/models/book.dart';
 import 'package:library_web/models/book_query.dart';
-import 'package:library_web/repositories/in_memory_author_repository.dart';
-import 'package:library_web/repositories/in_memory_book_repository.dart';
+import 'package:library_web/repositories/local_author_repository.dart';
+import 'package:library_web/repositories/local_book_repository.dart';
 
 void main() {
-  late InMemoryBookRepository books;
-  setUp(() => books = InMemoryBookRepository());
+  late LocalBookRepository books;
+  setUp(() => books = LocalBookRepository());
 
-  group('InMemoryBookRepository.find', () {
+  group('LocalBookRepository.find', () {
     test('начальный набор содержит не менее 20 книг', () async {
       final r = await books.find(const BookQuery(size: 50));
       expect(r.total, greaterThanOrEqualTo(20));
@@ -158,9 +158,9 @@ void main() {
     expect((await books.findById(updated.id))!.title, 'Правка');
   });
 
-  group('InMemoryAuthorRepository', () {
-    late InMemoryAuthorRepository authors;
-    setUp(() => authors = InMemoryAuthorRepository());
+  group('LocalAuthorRepository', () {
+    late LocalAuthorRepository authors;
+    setUp(() => authors = LocalAuthorRepository());
 
     test('начальный набор содержит не менее 8 авторов', () async {
       final r = await authors.find(const AuthorQuery(size: 50));

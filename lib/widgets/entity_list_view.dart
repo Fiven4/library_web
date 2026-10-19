@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/breakpoints.dart';
 import '../core/debouncer.dart';
 import '../models/list_query.dart';
+import '../repositories/entity_repository.dart';
 import '../state/entity_list_notifier.dart';
 import '../state/load_status.dart';
 import 'dev_menu.dart';
@@ -44,6 +45,8 @@ class EntityListView<T, Q extends ListQuery<Q>> extends StatefulWidget {
   final List<TableColumnSpec<T>> columns;
   final int Function(T item) idOf;
   final String Function(T item) itemPath;
+  final String createPath;
+  final String Function(T item) editPath;
   final String Function(T item) itemTitle;
   final bool Function(T item) isDeleted;
   final List<Widget> Function(FilterScope<Q> scope)? filters;
@@ -59,6 +62,8 @@ class EntityListView<T, Q extends ListQuery<Q>> extends StatefulWidget {
     required this.columns,
     required this.idOf,
     required this.itemPath,
+    required this.createPath,
+    required this.editPath,
     required this.itemTitle,
     required this.isDeleted,
     this.filters,
@@ -169,18 +174,52 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  /// Нарушение целостности (например, удаление издательства с книгами)
+  /// показывается в диалоге: сообщение содержит число связанных записей.
+  Future<void> _report(Object error) async {
+    if (error is ConflictException) {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          key: const ValueKey('conflict-dialog'),
+          icon: const Icon(Icons.block),
+          title: const Text('Удаление невозможно'),
+          content: Text(error.message),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Понятно'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      _toast('Не удалось выполнить операцию: $error');
+    }
+  }
+
   Future<void> _run(Future<void> Function() action, String done) async {
     try {
       await action();
       if (mounted) _toast(done);
     } catch (e) {
-      if (mounted) _toast('Не удалось выполнить операцию: $e');
+      if (mounted) await _report(e);
     }
   }
 
   Future<void> _open(T item) async {
     await context.push(widget.itemPath(item));
     // Карточка могла изменить запись (удаление, восстановление).
+    if (mounted) _notifier.load();
+  }
+
+  Future<void> _create() async {
+    await context.push(widget.createPath);
+    if (mounted) _notifier.load();
+  }
+
+  Future<void> _edit(T item) async {
+    await context.push(widget.editPath(item));
     if (mounted) _notifier.load();
   }
 
@@ -228,9 +267,17 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
     if (!ok) return;
     try {
       final deleted = await _notifier.deleteSelected();
-      if (mounted) _toast('Удалено записей: $deleted');
+      final skipped = count - deleted;
+      if (mounted) {
+        _toast(
+          skipped > 0
+              ? 'Удалено записей: $deleted. Не удалено: $skipped '
+                    '(на них ссылаются другие записи или они уже удалены)'
+              : 'Удалено записей: $deleted',
+        );
+      }
     } catch (e) {
-      if (mounted) _toast('Не удалось выполнить операцию: $e');
+      if (mounted) await _report(e);
     }
   }
 
@@ -265,6 +312,8 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
           switch (action) {
             case 'open':
               _open(item);
+            case 'edit':
+              _edit(item);
             case 'delete':
               _softDelete(item);
             case 'restore':
@@ -275,6 +324,7 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
         },
         itemBuilder: (_) => [
           const PopupMenuItem(value: 'open', child: Text('Открыть карточку')),
+          const PopupMenuItem(value: 'edit', child: Text('Изменить')),
           if (!deleted)
             const PopupMenuItem(value: 'delete', child: Text('Удалить'))
           else
@@ -309,6 +359,13 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
+              FilledButton.icon(
+                key: const ValueKey('create-button'),
+                onPressed: _create,
+                icon: const Icon(Icons.add),
+                label: const Text('Добавить'),
+              ),
+              const SizedBox(width: 4),
               const DevMenu(),
             ],
           ),

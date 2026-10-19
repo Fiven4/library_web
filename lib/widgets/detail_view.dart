@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/breakpoints.dart';
+import '../repositories/entity_repository.dart';
 import '../state/entity_detail_notifier.dart';
 import '../state/load_status.dart';
 import 'state_views.dart';
@@ -10,6 +11,7 @@ import 'state_views.dart';
 class DetailView<T> extends StatelessWidget {
   final EntityDetailNotifier<T> notifier;
   final String listPath;
+  final String editPath;
   final String Function(T item) titleOf;
   final bool Function(T item) isDeleted;
   final List<(String, Widget)> Function(T item) fields;
@@ -19,6 +21,7 @@ class DetailView<T> extends StatelessWidget {
     super.key,
     required this.notifier,
     required this.listPath,
+    required this.editPath,
     required this.titleOf,
     required this.isDeleted,
     required this.fields,
@@ -59,6 +62,39 @@ class DetailView<T> extends StatelessWidget {
       ),
     );
     return answer ?? false;
+  }
+
+  /// Выполняет действие над записью; нарушение целостности показывается
+  /// диалогом с числом связанных записей.
+  Future<void> _guard(
+    BuildContext context,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+    } on ConflictException catch (e) {
+      if (!context.mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          key: const ValueKey('conflict-dialog'),
+          icon: const Icon(Icons.block),
+          title: const Text('Удаление невозможно'),
+          content: Text(e.message),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Понятно'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Не удалось выполнить операцию: $e')),
+      );
+    }
   }
 
   @override
@@ -159,6 +195,15 @@ class DetailView<T> extends StatelessWidget {
                 spacing: 12,
                 runSpacing: 8,
                 children: [
+                  FilledButton.tonalIcon(
+                    key: const ValueKey('detail-edit'),
+                    onPressed: () async {
+                      await context.push(editPath);
+                      if (context.mounted) notifier.load();
+                    },
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('Изменить'),
+                  ),
                   if (!deleted)
                     OutlinedButton.icon(
                       key: const ValueKey('detail-delete'),
@@ -169,7 +214,9 @@ class DetailView<T> extends StatelessWidget {
                           'Запись будет помечена удалённой. Её можно восстановить.',
                           'Удалить',
                         );
-                        if (ok) await notifier.softDelete();
+                        if (ok && context.mounted) {
+                          await _guard(context, notifier.softDelete);
+                        }
                       },
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Удалить'),
@@ -177,7 +224,7 @@ class DetailView<T> extends StatelessWidget {
                   else
                     FilledButton.icon(
                       key: const ValueKey('detail-restore'),
-                      onPressed: notifier.restore,
+                      onPressed: () => _guard(context, notifier.restore),
                       icon: const Icon(Icons.restore),
                       label: const Text('Восстановить'),
                     ),
@@ -193,7 +240,9 @@ class DetailView<T> extends StatelessWidget {
                         'Запись будет стёрта безвозвратно.',
                         'Удалить навсегда',
                       );
-                      if (ok) await notifier.hardDelete();
+                      if (ok && context.mounted) {
+                        await _guard(context, notifier.hardDelete);
+                      }
                     },
                     icon: const Icon(Icons.delete_forever_outlined),
                     label: const Text('Удалить навсегда'),

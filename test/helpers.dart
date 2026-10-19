@@ -1,0 +1,33 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:library_web/app.dart';
+import 'package:library_web/core/router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<GoRouter> pumpApp(
+  WidgetTester tester, {
+  String location = '/books',
+  Size size = const Size(1440, 900),
+  SharedPreferences? prefs,
+}) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+  final router = createRouter(initialLocation: location);
+  await tester.pumpWidget(
+    AppProviders(
+      prefs: prefs,
+      child: LibraryApp(router: router),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return router;
+}
+
+Uri currentUri(GoRouter router) =>
+    router.routerDelegate.currentConfiguration.uri;
+
+/// Строки таблицы: у каждой есть своё меню действий.
+Finder get rows =>
+    find.byWidgetPredicate((w) => w.key.toString().contains('row-menu'));

@@ -1,6 +1,9 @@
 import '../models/author.dart';
 import '../models/book.dart';
-import '../models/reference.dart';
+import '../models/genre.dart';
+import '../models/library_card.dart';
+import '../models/publisher.dart';
+import '../models/reader.dart';
 
 /// Начальный набор данных. Совпадает по составу с мок-сервером учебного API,
 /// дополнен записями, чтобы постраничный вывод был виден на трёх страницах.
@@ -514,5 +517,82 @@ const seedBooks = [
     genreIds: [6],
     copiesTotal: 3,
     copiesAvailable: 3,
+  ),
+];
+
+const _d = DateTime.utc;
+
+final seedReaders = [
+  Reader(
+    id: 1,
+    fullName: 'Смирнов П. А.',
+    email: 'smirnov@example.com',
+    phone: '+7 900 100-10-01',
+    card: LibraryCard(
+      id: 1,
+      number: 'RC-000001',
+      issuedAt: _d(2026, 1, 15),
+      expiresAt: _d(2027, 1, 15),
+    ),
+  ),
+  Reader(
+    id: 2,
+    fullName: 'Кузнецова М. И.',
+    email: 'kuznetsova@example.com',
+    phone: '+7 900 100-10-02',
+    card: LibraryCard(
+      id: 2,
+      number: 'RC-000002',
+      issuedAt: _d(2026, 1, 16),
+      expiresAt: _d(2027, 1, 16),
+    ),
+  ),
+  Reader(
+    id: 3,
+    fullName: 'Попов Д. С.',
+    email: 'popov@example.com',
+    phone: '+7 900 100-10-03',
+    card: LibraryCard(
+      id: 3,
+      number: 'RC-000003',
+      issuedAt: _d(2025, 3, 1),
+      expiresAt: _d(2026, 3, 1),
+    ),
+  ),
+  Reader(
+    id: 4,
+    fullName: 'Васильева Е. О.',
+    email: 'vasileva@example.com',
+    phone: '+7 900 100-10-04',
+    card: LibraryCard(
+      id: 4,
+      number: 'RC-000004',
+      issuedAt: _d(2026, 2, 10),
+      expiresAt: _d(2027, 2, 10),
+    ),
+  ),
+  Reader(
+    id: 5,
+    fullName: 'Новиков А. В.',
+    email: 'novikov@example.com',
+    phone: '+7 900 100-10-05',
+    card: LibraryCard(
+      id: 5,
+      number: 'RC-000005',
+      issuedAt: _d(2024, 9, 5),
+      expiresAt: _d(2025, 9, 5),
+    ),
+  ),
+  Reader(
+    id: 6,
+    fullName: 'Морозова Т. Н.',
+    email: 'morozova@example.com',
+    phone: '+7 900 100-10-06',
+    card: LibraryCard(
+      id: 6,
+      number: 'RC-000006',
+      issuedAt: _d(2026, 3, 20),
+      expiresAt: _d(2027, 3, 20),
+    ),
   ),
 ];

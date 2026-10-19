@@ -29,6 +29,8 @@ class BooksScreen extends StatelessWidget {
       emptyMessage: 'По заданным условиям книг не найдено.',
       idOf: (b) => b.id,
       itemPath: (b) => '/books/${b.id}',
+      createPath: '/books/new',
+      editPath: (b) => '/books/${b.id}/edit',
       itemTitle: (b) => 'Книга «${b.title}»',
       isDeleted: (b) => b.isDeleted,
       columns: [

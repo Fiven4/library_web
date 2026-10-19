@@ -6,12 +6,12 @@ import 'package:library_web/models/book.dart';
 import 'package:library_web/models/book_query.dart';
 import 'package:library_web/models/page_result.dart';
 import 'package:library_web/repositories/entity_repository.dart';
-import 'package:library_web/repositories/in_memory_book_repository.dart';
+import 'package:library_web/repositories/local_book_repository.dart';
 import 'package:library_web/state/list_notifiers.dart';
 import 'package:library_web/state/load_status.dart';
 
 /// Репозиторий, ответами которого управляет тест.
-class _ManualRepository extends InMemoryBookRepository {
+class _ManualRepository extends LocalBookRepository {
   final pending = <Completer<PageResult<Book>>>[];
 
   @override
@@ -24,7 +24,7 @@ class _ManualRepository extends InMemoryBookRepository {
 
 void main() {
   test('успешная загрузка: loading, затем success', () async {
-    final n = BooksNotifier(InMemoryBookRepository());
+    final n = BooksNotifier(LocalBookRepository());
     final states = <LoadStatus>[];
     n.addListener(() => states.add(n.status));
     await n.load();
@@ -34,7 +34,7 @@ void main() {
   });
 
   test('пустой результат — успех, а не ошибка и не загрузка', () async {
-    final n = BooksNotifier(InMemoryBookRepository());
+    final n = BooksNotifier(LocalBookRepository());
     await n.applyQuery(const BookQuery(search: 'такой книги нет'));
     expect(n.status, LoadStatus.success);
     expect(n.isEmptyResult, isTrue);
@@ -43,7 +43,7 @@ void main() {
 
   test('сбой репозитория даёт состояние ошибки с сообщением', () async {
     final dev = DevSettings()..failing = true;
-    final n = BooksNotifier(InMemoryBookRepository(dev));
+    final n = BooksNotifier(LocalBookRepository(dev: dev));
     await n.load();
     expect(n.status, LoadStatus.error);
     expect(n.error, contains('Не удалось загрузить список'));
@@ -53,7 +53,7 @@ void main() {
   });
 
   test('смена условий отбора сбрасывает выделение', () async {
-    final n = BooksNotifier(InMemoryBookRepository());
+    final n = BooksNotifier(LocalBookRepository());
     await n.load();
     n.toggleSelection(1);
     n.toggleSelection(2);
@@ -63,7 +63,7 @@ void main() {
   });
 
   test('выделение страницы целиком и снятие', () async {
-    final n = BooksNotifier(InMemoryBookRepository());
+    final n = BooksNotifier(LocalBookRepository());
     await n.load();
     n.setPageSelection(true);
     expect(n.selected, hasLength(10));
@@ -72,7 +72,7 @@ void main() {
   });
 
   test('удаление выбранных обновляет список и сбрасывает выделение', () async {
-    final n = BooksNotifier(InMemoryBookRepository());
+    final n = BooksNotifier(LocalBookRepository());
     await n.load();
     n.toggleSelection(1);
     n.toggleSelection(2);
@@ -101,7 +101,7 @@ void main() {
   });
 
   test('повторное применение тех же условий не перезагружает список', () async {
-    final n = BooksNotifier(InMemoryBookRepository());
+    final n = BooksNotifier(LocalBookRepository());
     await n.applyQuery(const BookQuery(search: 'война'));
     var notified = 0;
     n.addListener(() => notified++);
@@ -110,7 +110,7 @@ void main() {
   });
 
   test('ошибки репозитория при удалении пробрасываются', () async {
-    final n = BooksNotifier(InMemoryBookRepository());
+    final n = BooksNotifier(LocalBookRepository());
     expect(() => n.softDelete(9999), throwsA(isA<RepositoryException>()));
   });
 }

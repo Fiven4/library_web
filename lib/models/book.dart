@@ -1,3 +1,5 @@
+import 'json_utils.dart';
+
 class Book {
   final int id;
   final String title;
@@ -57,4 +59,34 @@ class Book {
       deletedAt: clearDeletedAt ? null : (deletedAt ?? this.deletedAt),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'isbn': isbn,
+    'year': year,
+    'pages': pages,
+    'publisherId': publisherId,
+    'authorIds': authorIds,
+    'genreIds': genreIds,
+    'copiesTotal': copiesTotal,
+    'copiesAvailable': copiesAvailable,
+    'deletedAt': deletedAt?.toIso8601String(),
+  };
+
+  /// Разбор устойчив к отсутствующим и null-значениям: приложение не должно
+  /// падать из-за испорченной записи в хранилище.
+  factory Book.fromJson(Map<String, dynamic> json) => Book(
+    id: intOf(json['id']),
+    title: stringOf(json['title']),
+    isbn: stringOf(json['isbn']),
+    year: intOf(json['year']),
+    pages: intOf(json['pages']),
+    publisherId: intOf(json['publisherId']),
+    authorIds: intListOf(json['authorIds']),
+    genreIds: intListOf(json['genreIds']),
+    copiesTotal: intOf(json['copiesTotal']),
+    copiesAvailable: intOf(json['copiesAvailable']),
+    deletedAt: dateOf(json['deletedAt']),
+  );
 }

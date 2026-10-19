@@ -2,38 +2,77 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'core/dev_settings.dart';
 import 'repositories/author_repository.dart';
 import 'repositories/book_repository.dart';
-import 'repositories/in_memory_author_repository.dart';
-import 'repositories/in_memory_book_repository.dart';
-import 'repositories/reference_repository.dart';
+import 'repositories/genre_repository.dart';
+import 'repositories/local_author_repository.dart';
+import 'repositories/local_book_repository.dart';
+import 'repositories/local_genre_repository.dart';
+import 'repositories/local_publisher_repository.dart';
+import 'repositories/local_reader_repository.dart';
+import 'repositories/publisher_repository.dart';
+import 'repositories/reader_repository.dart';
 import 'state/list_notifiers.dart';
 import 'state/reference_notifier.dart';
+import 'storage/storage_notices.dart';
 
 /// Провайдеры размещены выше MaterialApp: состояние нужно на всех экранах.
-/// Подмена InMemory-репозиториев на API-реализации (ПР4) делается здесь
-/// и не затрагивает ни один экран.
+/// Хранилище данных выбирается здесь: с [prefs] данные сохраняются в
+/// localStorage и переживают перезагрузку страницы, без него живут только
+/// в памяти (тесты). Подмена репозиториев на API-реализации (ПР4)
+/// делается здесь и не затрагивает ни один экран.
 class AppProviders extends StatelessWidget {
   final Widget child;
+  final SharedPreferences? prefs;
 
-  const AppProviders({super.key, required this.child});
+  const AppProviders({super.key, required this.child, this.prefs});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => DevSettings()),
+        Provider(create: (_) => StorageNotices()),
         Provider<BookRepository>(
-          create: (context) =>
-              InMemoryBookRepository(context.read<DevSettings>()),
+          create: (context) => LocalBookRepository(
+            prefs: prefs,
+            dev: context.read<DevSettings>(),
+            notices: context.read<StorageNotices>(),
+          ),
         ),
         Provider<AuthorRepository>(
-          create: (context) =>
-              InMemoryAuthorRepository(context.read<DevSettings>()),
+          create: (context) => LocalAuthorRepository(
+            prefs: prefs,
+            dev: context.read<DevSettings>(),
+            notices: context.read<StorageNotices>(),
+            books: context.read<BookRepository>(),
+          ),
         ),
-        Provider<ReferenceRepository>(
-          create: (_) => InMemoryReferenceRepository(),
+        Provider<GenreRepository>(
+          create: (context) => LocalGenreRepository(
+            prefs: prefs,
+            dev: context.read<DevSettings>(),
+            notices: context.read<StorageNotices>(),
+            books: context.read<BookRepository>(),
+          ),
+        ),
+        Provider<PublisherRepository>(
+          create: (context) => LocalPublisherRepository(
+            prefs: prefs,
+            dev: context.read<DevSettings>(),
+            notices: context.read<StorageNotices>(),
+            books: context.read<BookRepository>(),
+          ),
+        ),
+        Provider<ReaderRepository>(
+          create: (context) => LocalReaderRepository(
+            prefs: prefs,
+            dev: context.read<DevSettings>(),
+            notices: context.read<StorageNotices>(),
+          ),
         ),
         ChangeNotifierProvider(
           create: (context) => BooksNotifier(context.read<BookRepository>()),
@@ -43,9 +82,22 @@ class AppProviders extends StatelessWidget {
               AuthorsNotifier(context.read<AuthorRepository>()),
         ),
         ChangeNotifierProvider(
+          create: (context) => GenresNotifier(context.read<GenreRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              PublishersNotifier(context.read<PublisherRepository>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              ReadersNotifier(context.read<ReaderRepository>()),
+        ),
+        ChangeNotifierProvider(
           create: (context) => ReferenceNotifier(
-            context.read<ReferenceRepository>(),
-            context.read<AuthorRepository>(),
+            genres: context.read<GenreRepository>(),
+            publishers: context.read<PublisherRepository>(),
+            authors: context.read<AuthorRepository>(),
+            books: context.read<BookRepository>(),
           )..load(),
         ),
       ],
