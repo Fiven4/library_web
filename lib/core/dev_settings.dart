@@ -1,8 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-/// Переключатели для проверки поведения интерфейса: имитация сбоя и
-/// медленного ответа. Нужны, чтобы увидеть состояния «ошибка» и «загрузка»,
-/// которые на данных в памяти иначе мгновенно проходят.
 class DevSettings extends ChangeNotifier {
   bool _failing = false;
   bool _slow = false;

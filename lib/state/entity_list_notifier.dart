@@ -5,9 +5,6 @@ import '../models/page_result.dart';
 import '../repositories/entity_repository.dart';
 import 'load_status.dart';
 
-/// Состояние экрана со списком: условия отбора, текущая страница, статус
-/// загрузки и выделенные строки. Один класс обслуживает любую сущность,
-/// различия сводятся к типам [T] и [Q].
 class EntityListNotifier<T, Q extends ListQuery<Q>> extends ChangeNotifier {
   EntityListNotifier(this._repository, this._query, this._idOf);
 
@@ -29,7 +26,6 @@ class EntityListNotifier<T, Q extends ListQuery<Q>> extends ChangeNotifier {
   Set<int> get selected => Set.unmodifiable(_selected);
   bool get hasSelection => _selected.isNotEmpty;
 
-  /// Загрузка завершилась успешно, но записей нет.
   bool get isEmptyResult =>
       _status == LoadStatus.success && _result.items.isEmpty;
 
@@ -44,8 +40,6 @@ class EntityListNotifier<T, Q extends ListQuery<Q>> extends ChangeNotifier {
   }
 
   Future<void> load() async {
-    // Номер запроса защищает от «гонки»: если пользователь успел изменить
-    // условия, ответ на устаревший запрос будет отброшен.
     final ticket = ++_loadCounter;
     _status = LoadStatus.loading;
     _error = null;
@@ -63,14 +57,12 @@ class EntityListNotifier<T, Q extends ListQuery<Q>> extends ChangeNotifier {
     _safeNotify();
   }
 
-  /// Применяет новые условия отбора. Без [force] повторная загрузка
-  /// не выполняется, если условия те же и данные уже получены.
   Future<void> applyQuery(Q next, {bool force = false}) {
     if (!force && next == _query && _status == LoadStatus.success) {
       return Future.value();
     }
     _query = next;
-    _selected.clear(); // выделение теряет смысл при смене условий отбора
+    _selected.clear();
     return load();
   }
 
@@ -79,7 +71,6 @@ class EntityListNotifier<T, Q extends ListQuery<Q>> extends ChangeNotifier {
     _safeNotify();
   }
 
-  /// Выделяет или снимает выделение со всех строк текущей страницы.
   void setPageSelection(bool selected) {
     for (final item in _result.items) {
       selected ? _selected.add(_idOf(item)) : _selected.remove(_idOf(item));
@@ -92,7 +83,6 @@ class EntityListNotifier<T, Q extends ListQuery<Q>> extends ChangeNotifier {
     _safeNotify();
   }
 
-  /// Логически удаляет выделенные записи, возвращает число удалённых.
   Future<int> deleteSelected() async {
     final count = await _repository.deleteMany(_selected.toList());
     _selected.clear();

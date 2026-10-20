@@ -7,10 +7,7 @@ import 'core/router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Адреса без решётки: /books?page=2 вместо /#/books?page=2
   usePathUrlStrategy();
-  // На web shared_preferences пишет в localStorage: данные переживают
-  // перезагрузку страницы.
   final prefs = await SharedPreferences.getInstance();
   runApp(
     AppProviders(

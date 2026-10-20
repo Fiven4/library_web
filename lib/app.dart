@@ -19,11 +19,6 @@ import 'state/list_notifiers.dart';
 import 'state/reference_notifier.dart';
 import 'storage/storage_notices.dart';
 
-/// Провайдеры размещены выше MaterialApp: состояние нужно на всех экранах.
-/// Хранилище данных выбирается здесь: с [prefs] данные сохраняются в
-/// localStorage и переживают перезагрузку страницы, без него живут только
-/// в памяти (тесты). Подмена репозиториев на API-реализации (ПР4)
-/// делается здесь и не затрагивает ни один экран.
 class AppProviders extends StatelessWidget {
   final Widget child;
   final SharedPreferences? prefs;

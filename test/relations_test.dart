@@ -92,7 +92,7 @@ void main() {
       );
       final created = await readers.create(_reader());
       expect(created.id, 7);
-      expect(created.card.id, 7); // билет получает идентификатор читателя
+      expect(created.card.id, 7);
     });
 
     test(
@@ -140,14 +140,13 @@ void main() {
           publishers.hardDelete(1),
           throwsA(isA<ConflictException>()),
         );
-        // запись осталась на месте
         expect((await publishers.findById(1))!.isDeleted, isFalse);
       },
     );
 
     test('после удаления книг издательство удаляется', () async {
       final publishers = LocalPublisherRepository(books: books);
-      await books.hardDelete(35); // единственная книга «МИФ»
+      await books.hardDelete(35);
       await publishers.softDelete(6);
       expect((await publishers.findById(6))!.isDeleted, isTrue);
     });
@@ -155,7 +154,7 @@ void main() {
     test('физическое удаление учитывает и удалённые логически книги', () async {
       final publishers = LocalPublisherRepository(books: books);
       await books.softDelete(35);
-      await publishers.softDelete(6); // логически удалённая книга не мешает
+      await publishers.softDelete(6);
       await expectLater(
         publishers.hardDelete(6),
         throwsA(isA<ConflictException>()),
@@ -179,7 +178,7 @@ void main() {
       final publishers = LocalPublisherRepository(books: books);
       await books.hardDelete(35);
       final deleted = await publishers.deleteMany([1, 2, 6]);
-      expect(deleted, 1); // только «МИФ»
+      expect(deleted, 1);
     });
 
     test('читатель удаляется без ограничений', () async {

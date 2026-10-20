@@ -7,13 +7,6 @@ import '../../state/load_status.dart';
 import '../state_views.dart';
 import 'field_specs.dart';
 
-/// Универсальная форма создания и изменения записи.
-///
-/// Описание полей задаётся списком [FieldSpec], а сам виджет общий для всех
-/// сущностей: он выводит поля, показывает ошибки под каждым полем, проверяет
-/// форму, отправляет данные через [EntityFormNotifier], показывает ошибки
-/// сервера (например, «ISBN уже существует») в соответствующих полях и
-/// предупреждает о несохранённых изменениях при попытке уйти с экрана.
 class EntityFormView<T> extends StatefulWidget {
   final EntityFormNotifier<T> notifier;
   final String createTitle;
@@ -45,8 +38,6 @@ class _EntityFormViewState<T> extends State<EntityFormView<T>> {
   bool _inited = false;
   bool _leaving = false;
 
-  /// Значение поля в момент, когда сервер вернул для него ошибку. Ошибка
-  /// показывается, только пока значение не изменилось.
   final Map<String, String> _errorValues = {};
 
   EntityFormNotifier<T> get _notifier => widget.notifier;
@@ -141,7 +132,6 @@ class _EntityFormViewState<T> extends State<EntityFormView<T>> {
     final saved = await _notifier.submit(widget.build(_values, _notifier.item));
     if (!mounted) return;
     if (saved == null) {
-      // Ошибки сервера записываем рядом со значениями и показываем в полях.
       for (final key in _notifier.fieldErrors.keys) {
         _errorValues[key] = _snapshot(_values[key]);
       }
@@ -201,8 +191,6 @@ class _EntityFormViewState<T> extends State<EntityFormView<T>> {
       );
     }
 
-    // Поля заполняются один раз, когда запись уже загружена: так форма
-    // редактирования не открывается пустой.
     if (!_inited) {
       _values = _copy(widget.initialValues(_notifier.item));
       _initial = _copy(_values);
@@ -218,8 +206,6 @@ class _EntityFormViewState<T> extends State<EntityFormView<T>> {
           constraints: const BoxConstraints(maxWidth: 720),
           child: Form(
             key: _formKey,
-            // Поля проверяются по отдельности после первого взаимодействия,
-            // а вся форма целиком только при отправке.
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -323,14 +309,11 @@ class _EntityFormViewState<T> extends State<EntityFormView<T>> {
   Widget _buildDropdown(DropdownSpec spec) {
     final options = spec.options(_values);
     var value = _values[spec.key] as int?;
-    // Значение должно присутствовать в списке, иначе DropdownButton
-    // выбросит исключение.
     if (value != null && !options.any((o) => o.$1 == value)) {
       value = null;
       _values[spec.key] = null;
     }
     return DropdownButtonFormField<int>(
-      // Ключ пересоздаёт поле при смене значения или списка (каскад).
       key: ValueKey(
         'dd-${spec.key}-$value-${options.map((o) => o.$1).join(',')}',
       ),
@@ -383,7 +366,6 @@ class _EntityFormViewState<T> extends State<EntityFormView<T>> {
             border: const OutlineInputBorder(),
             helperText: spec.helper,
             helperMaxLines: 2,
-            // Ошибка показывается так же, как у обычного поля.
             errorText: field.errorText,
           ),
           child: options.isEmpty
@@ -402,7 +384,6 @@ class _EntityFormViewState<T> extends State<EntityFormView<T>> {
                           next.contains(o.$1)
                               ? next.remove(o.$1)
                               : next.add(o.$1);
-                          // Без didChange форма не узнает о новом значении.
                           field.didChange(next);
                           _notifier.clearFieldError(spec.key);
                           _set(spec.key, next);
@@ -427,8 +408,6 @@ class _TextInput extends StatefulWidget {
 }
 
 class _TextInputState extends State<_TextInput> {
-  // Начальное значение задаётся при создании контроллера, а не через
-  // initialValue: одновременно использовать оба нельзя.
   late final TextEditingController _controller = TextEditingController(
     text: widget.state._values[widget.spec.key] as String? ?? '',
   );

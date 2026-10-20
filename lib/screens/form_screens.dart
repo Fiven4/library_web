@@ -23,9 +23,6 @@ int _int(FormValues v, String key) => int.tryParse(_text(v, key)) ?? 0;
 String _dateText(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-/// Форма книги: все три типа связей в одном экране.
-/// Издательство (многие к одному) выбирается списком, авторы и жанры
-/// (многие ко многим) множественным выбором.
 class BookFormScreen extends StatelessWidget {
   final int? id;
 
@@ -44,8 +41,6 @@ class BookFormScreen extends StatelessWidget {
       return options;
     }
 
-    /// Каскад: после выбора издательства список авторов сужается до тех,
-    /// кто уже выпускал книги в нём. Уже выбранные авторы остаются в списке.
     List<Option> authorOptions(FormValues v) {
       var authors = ref.authors;
       final publisherId = v['publisherId'] as int?;
@@ -131,7 +126,6 @@ class BookFormScreen extends StatelessWidget {
               requiredMessage: 'Выберите издательство',
               options: publisherOptions,
             ),
-            // Переключатель каскада виден, когда издательство уже выбрано.
             if (ref.publishers.isNotEmpty)
               const SwitchSpec(
                 key: 'narrowAuthors',
@@ -169,7 +163,6 @@ class BookFormScreen extends StatelessWidget {
                 label: 'Доступно экземпляров',
                 required: true,
                 keyboard: TextInputType.number,
-                // Проверка по двум полям: доступных не больше, чем всего.
                 validator: (value, values) {
                   final base = V.combine([
                     V.required('Укажите количество'),
@@ -401,8 +394,6 @@ class PublisherFormScreen extends StatelessWidget {
   }
 }
 
-/// Форма читателя. Читательский билет (связь «один к одному») редактируется
-/// прямо здесь вложенной группой полей, отдельного экрана для него нет.
 class ReaderFormScreen extends StatelessWidget {
   final int? id;
 

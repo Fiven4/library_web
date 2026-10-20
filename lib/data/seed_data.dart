@@ -5,9 +5,6 @@ import '../models/library_card.dart';
 import '../models/publisher.dart';
 import '../models/reader.dart';
 
-/// Начальный набор данных. Совпадает по составу с мок-сервером учебного API,
-/// дополнен записями, чтобы постраничный вывод был виден на трёх страницах.
-
 const seedPublishers = [
   Publisher(id: 1, name: 'АСТ', city: 'Москва', foundedYear: 1990),
   Publisher(id: 2, name: 'Эксмо', city: 'Москва', foundedYear: 1991),

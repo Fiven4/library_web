@@ -15,7 +15,7 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester);
-    expect(find.byType(EntityTable<dynamic>), findsNothing); // тип конкретный
+    expect(find.byType(EntityTable<dynamic>), findsNothing);
     expect(
       find.textContaining('Страница 1 из 4 · всего записей: 36'),
       findsOneWidget,
@@ -31,7 +31,6 @@ void main() {
 
     await tester.enterText(find.byKey(const ValueKey('search-field')), 'война');
     await tester.pump(const Duration(milliseconds: 200));
-    // Пауза ещё не закончилась: адрес прежний, выборка не запускалась.
     expect(currentUri(router).queryParameters, isEmpty);
 
     await tester.pump(const Duration(milliseconds: 300));
@@ -138,7 +137,6 @@ void main() {
     expect(currentUri(router).queryParameters['includeDeleted'], 'true');
     expect(find.textContaining('всего записей: 36'), findsOneWidget);
 
-    // Переход назад по истории браузера выглядит как возврат к прежнему адресу.
     router.go('/books');
     await tester.pumpAndSettle();
     expect(find.textContaining('всего записей: 35'), findsOneWidget);
@@ -261,7 +259,6 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Удалить').last);
     await tester.pumpAndSettle();
-    // подтверждение в диалоге
     await tester.tap(find.widgetWithText(FilledButton, 'Удалить'));
     await tester.pumpAndSettle();
     expect(find.textContaining('всего записей: 35'), findsOneWidget);
@@ -289,7 +286,6 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('show-deleted')));
     await tester.pumpAndSettle();
-    // запись исчезла и из показа удалённых
     expect(find.textContaining('всего записей: 35'), findsOneWidget);
   });
 

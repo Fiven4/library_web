@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'entity_table.dart';
 
-/// Компактный вид списка для узкого окна: каждая запись — карточка.
-/// Использует те же описания колонок, что и [EntityTable]: первая колонка
-/// становится заголовком карточки, остальные — строками «подпись: значение».
 class EntityCardList<T> extends StatelessWidget {
   final List<TableColumnSpec<T>> columns;
   final List<T> items;

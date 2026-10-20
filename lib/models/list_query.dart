@@ -1,11 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-/// Допустимые размеры страницы.
 const pageSizes = [10, 25, 50];
 
-/// Общая часть условий отбора для всех списков: поиск, сортировка,
-/// страница и показ удалённых. Условия неизменяемы и целиком превращаются
-/// в параметры адреса, поэтому ссылку на список можно отправить коллеге.
 abstract class ListQuery<Q extends ListQuery<Q>> {
   const ListQuery();
 
@@ -22,8 +18,6 @@ abstract class ListQuery<Q extends ListQuery<Q>> {
   Q withSort(String field, bool ascending);
   Q withIncludeDeleted(bool value);
 
-  /// Параметры адреса. Значения по умолчанию не записываются,
-  /// чтобы адрес оставался коротким.
   Map<String, String> toParams();
 
   @override
@@ -38,8 +32,6 @@ abstract class ListQuery<Q extends ListQuery<Q>> {
   );
 }
 
-/// Разбирает параметр `sort` вида `year,desc`. Неизвестное поле заменяется
-/// полем по умолчанию, чтобы испорченный адрес не ломал экран.
 ({String field, bool ascending}) parseSort(
   String? raw,
   Set<String> allowed,
@@ -62,8 +54,6 @@ int parseSize(String? raw) {
   return pageSizes.contains(value) ? value! : pageSizes.first;
 }
 
-/// Собирает адрес вида `/books?search=война&sort=year,desc`.
-/// Запятая в значениях остаётся читаемой, остальное кодируется.
 String buildLocation(String path, Map<String, String> params) {
   if (params.isEmpty) return path;
   final query = params.entries

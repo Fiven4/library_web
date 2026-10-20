@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../core/dev_settings.dart';
 
-/// Меню проверки: имитация сбоя и медленного ответа. Позволяет увидеть
-/// состояния «ошибка» и «загрузка» на данных в памяти.
 class DevMenu extends StatelessWidget {
   const DevMenu({super.key});
 

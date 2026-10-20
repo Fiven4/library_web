@@ -13,9 +13,6 @@ import 'entity_table.dart';
 import 'pagination_bar.dart';
 import 'state_views.dart';
 
-/// Что получает построитель фильтров: текущие условия (для отображения) и
-/// способы их изменить. Изменение описывается функцией от актуальных условий,
-/// чтобы отложенное по времени действие не затёрло более свежие правки.
 class FilterScope<Q> {
   final Q query;
   final void Function(Q Function(Q current) change) apply;
@@ -28,13 +25,6 @@ class FilterScope<Q> {
   });
 }
 
-/// Универсальный экран списка: поиск с задержкой, фильтры, сортировка,
-/// выделение и удаление строк, постраничный вывод, четыре состояния загрузки
-/// и переключение между таблицей и карточками.
-///
-/// Условия отбора берутся из адреса ([query]) и в адрес же записываются при
-/// каждом изменении, поэтому ссылку на список можно открыть в другой вкладке,
-/// а кнопка «назад» возвращает к предыдущему набору условий.
 class EntityListView<T, Q extends ListQuery<Q>> extends StatefulWidget {
   final String title;
   final String basePath;
@@ -94,7 +84,6 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.query != widget.query) {
       _applyQueryAfterBuild();
-      // Поиск изменился не вводом (кнопка «назад», сброс) — обновляем поле.
       if (oldWidget.query.search != widget.query.search &&
           !_debouncer.isPending &&
           _search.text != widget.query.search) {
@@ -111,16 +100,12 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
     super.dispose();
   }
 
-  /// Состояние меняется после построения кадра, иначе notifyListeners()
-  /// был бы вызван во время build.
   void _applyQueryAfterBuild({bool force = false}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _notifier.applyQuery(widget.query, force: force);
     });
   }
 
-  /// Адрес с номером страницы за пределами списка исправляется на последнюю
-  /// страницу, а не показывает пустой экран.
   void _correctPage() {
     final result = _notifier.result;
     if (_notifier.status == LoadStatus.success &&
@@ -174,8 +159,6 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// Нарушение целостности (например, удаление издательства с книгами)
-  /// показывается в диалоге: сообщение содержит число связанных записей.
   Future<void> _report(Object error) async {
     if (error is ConflictException) {
       await showDialog<void>(
@@ -209,7 +192,6 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
 
   Future<void> _open(T item) async {
     await context.push(widget.itemPath(item));
-    // Карточка могла изменить запись (удаление, восстановление).
     if (mounted) _notifier.load();
   }
 
@@ -281,7 +263,6 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
     }
   }
 
-  /// Первая колонка (название) открывает карточку по щелчку.
   List<TableColumnSpec<T>> get _columns {
     final first = widget.columns.first;
     return [
@@ -413,7 +394,6 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
     );
   }
 
-  /// Число применённых условий, кроме поиска, сортировки и страницы.
   int _activeFilters(Q query) => query
       .toParams()
       .keys
@@ -434,7 +414,6 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
         border: const OutlineInputBorder(),
         isDense: true,
       ),
-      // Выборка запускается после паузы в наборе, а не на каждую клавишу.
       onChanged: (text) =>
           _debouncer.run(() => _go(widget.query.withSearch(text))),
     );
@@ -503,8 +482,6 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
       );
     }
 
-    // Узкое окно: фильтры спрятаны в раскрываемую панель, чтобы карточки
-    // получили больше места. Раскрытие — локальное состояние виджета.
     final active = _activeFilters(query);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

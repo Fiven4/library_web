@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-/// Откладывает действие до паузы в потоке событий: каждый новый вызов
-/// сбрасывает таймер. Нужен, чтобы поиск не запускал выборку на каждую
-/// нажатую клавишу.
 class Debouncer {
   Debouncer({this.delay = const Duration(milliseconds: 400)});
 

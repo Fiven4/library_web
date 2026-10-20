@@ -9,8 +9,6 @@ import '../widgets/entity_list_view.dart';
 import '../widgets/entity_table.dart';
 import '../widgets/filter_widgets.dart';
 
-/// Список книг. Экран описывает только колонки и фильтры, всё остальное
-/// делает универсальный [EntityListView].
 class BooksScreen extends StatelessWidget {
   final BookQuery query;
 
@@ -99,7 +97,6 @@ class BooksScreen extends StatelessWidget {
   }
 }
 
-/// Текст ячейки не шире 260 пикселей, длинное значение переносится.
 class CellText extends StatelessWidget {
   final String text;
 
@@ -112,7 +109,6 @@ class CellText extends StatelessWidget {
   );
 }
 
-/// Название с пометкой для логически удалённой записи.
 class TitleCell extends StatelessWidget {
   final String title;
   final bool deleted;

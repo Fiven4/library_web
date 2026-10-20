@@ -28,6 +28,5 @@ Future<GoRouter> pumpApp(
 Uri currentUri(GoRouter router) =>
     router.routerDelegate.currentConfiguration.uri;
 
-/// Строки таблицы: у каждой есть своё меню действий.
 Finder get rows =>
     find.byWidgetPredicate((w) => w.key.toString().contains('row-menu'));

@@ -80,7 +80,6 @@ void main() {
       );
       expect(copy.card.number, 'RC-000001');
       expect(copy.card.expiresAt, DateTime.utc(2027, 1, 1));
-      // Пустой объект не должен приводить к исключению.
       expect(Reader.fromJson(const {}).card.number, '');
     });
   });
@@ -100,7 +99,6 @@ void main() {
       final created = await first.create(_newBook);
       expect(created.id, 37);
 
-      // Новый экземпляр читает те же данные из хранилища.
       final second = LocalBookRepository(prefs: prefs);
       final page = await second.find(const BookQuery(search: 'Сохранённая'));
       expect(page.items.single.id, 37);
@@ -131,7 +129,7 @@ void main() {
         final b = await repo.create(
           _newBook.copyWith(isbn: '978-5-11-111111-1'),
         );
-        expect(b.id, a.id); // максимальный id снова свободен, дублей нет
+        expect(b.id, a.id);
         final ids = (await repo.findAll()).map((e) => e.id);
         expect(ids.toSet(), hasLength(ids.length));
       },

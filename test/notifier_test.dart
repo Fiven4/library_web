@@ -10,7 +10,6 @@ import 'package:library_web/repositories/local_book_repository.dart';
 import 'package:library_web/state/list_notifiers.dart';
 import 'package:library_web/state/load_status.dart';
 
-/// Репозиторий, ответами которого управляет тест.
 class _ManualRepository extends LocalBookRepository {
   final pending = <Completer<PageResult<Book>>>[];
 
@@ -87,7 +86,6 @@ void main() {
     final n = BooksNotifier(repo);
     final first = n.applyQuery(const BookQuery(search: 'a'), force: true);
     final second = n.applyQuery(const BookQuery(search: 'b'), force: true);
-    // Второй запрос отвечает раньше первого.
     repo.pending[1].complete(
       const PageResult(items: [], page: 1, size: 10, total: 0),
     );

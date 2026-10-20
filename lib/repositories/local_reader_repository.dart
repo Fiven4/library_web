@@ -40,7 +40,6 @@ class LocalReaderRepository extends LocalRepository<Reader, ReaderQuery>
   Reader withDeleted(Reader item, DateTime? at) => at == null
       ? item.copyWith(clearDeletedAt: true)
       : item.copyWith(deletedAt: at);
-  // Билет создаётся вместе с читателем и получает тот же идентификатор.
   @override
   Reader withId(Reader item, int id) => Reader(
     id: id,

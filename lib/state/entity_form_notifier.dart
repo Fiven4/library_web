@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../repositories/entity_repository.dart';
 import 'load_status.dart';
 
-/// Состояние формы создания и изменения записи. Один класс обслуживает
-/// любую сущность: при [id] == null запись создаётся, иначе изменяется.
 class EntityFormNotifier<T> extends ChangeNotifier {
   EntityFormNotifier(this._store, this.id);
 
@@ -22,14 +20,11 @@ class EntityFormNotifier<T> extends ChangeNotifier {
   T? get item => _item;
   LoadStatus get status => _status;
 
-  /// Общая ошибка (не относящаяся к конкретному полю).
   String? get error => _error;
 
-  /// Ошибки сервера по полям, например «ISBN уже существует».
   Map<String, String> get fieldErrors => _fieldErrors;
   bool get saving => _saving;
 
-  /// Редактируемая запись не найдена (адрес набран вручную).
   bool get notFound =>
       isEditing && _status == LoadStatus.success && _item == null;
 
@@ -61,7 +56,6 @@ class EntityFormNotifier<T> extends ChangeNotifier {
     _safeNotify();
   }
 
-  /// Забывает ошибку поля: она относилась к прежнему значению.
   void clearFieldError(String key) {
     if (_fieldErrors.containsKey(key)) {
       _fieldErrors = {..._fieldErrors}..remove(key);
@@ -69,8 +63,6 @@ class EntityFormNotifier<T> extends ChangeNotifier {
     }
   }
 
-  /// Сохраняет запись. Возвращает сохранённую запись или null при ошибке;
-  /// ошибки по полям доступны в [fieldErrors], остальные в [error].
   Future<T?> submit(T entity) async {
     _saving = true;
     _error = null;

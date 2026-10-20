@@ -29,9 +29,6 @@ class Book {
 
   bool get isDeleted => deletedAt != null;
 
-  /// Копия с изменёнными полями. Параметр [clearDeletedAt] отличает
-  /// «не менять поле» от «сбросить в null»: оба случая иначе выглядели бы
-  /// как переданный null.
   Book copyWith({
     String? title,
     String? isbn,
@@ -74,8 +71,6 @@ class Book {
     'deletedAt': deletedAt?.toIso8601String(),
   };
 
-  /// Разбор устойчив к отсутствующим и null-значениям: приложение не должно
-  /// падать из-за испорченной записи в хранилище.
   factory Book.fromJson(Map<String, dynamic> json) => Book(
     id: intOf(json['id']),
     title: stringOf(json['title']),

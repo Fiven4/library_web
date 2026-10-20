@@ -10,9 +10,6 @@ import '../repositories/entity_repository.dart';
 import '../repositories/genre_repository.dart';
 import '../repositories/publisher_repository.dart';
 
-/// Справочные данные для подписей в таблицах и для выпадающих списков.
-/// Заполняются из репозиториев (не константами) и обновляются при любом
-/// изменении данных: новый жанр сразу появляется в форме книги.
 class ReferenceNotifier extends ChangeNotifier {
   ReferenceNotifier({
     required GenreRepository genres,
@@ -47,7 +44,6 @@ class ReferenceNotifier extends ChangeNotifier {
 
   bool get loaded => _loaded;
 
-  /// Для выбора в формах и фильтрах: только неудалённые, по алфавиту.
   List<Genre> get genres => _sorted([
     for (final g in _genres)
       if (!g.isDeleted) g,
@@ -61,7 +57,6 @@ class ReferenceNotifier extends ChangeNotifier {
       if (!a.isDeleted) a,
   ], (a) => a.fullName);
 
-  /// Страны и города без повторов, по алфавиту.
   List<String> get countries =>
       (_authors.map((a) => a.country).toSet().toList()..sort());
   List<String> get cities =>
@@ -97,15 +92,11 @@ class ReferenceNotifier extends ChangeNotifier {
       _publishers = results[1] as List<Publisher>;
       _authors = results[2] as List<Author>;
       _books = results[3] as List<Book>;
-    } catch (_) {
-      // Подписи необязательны: при сбое таблицы покажут прочерки.
-    }
+    } catch (_) {}
     _loaded = true;
     if (!_disposed) notifyListeners();
   }
 
-  /// Авторы, у которых уже есть книги этого издательства. Нужны для
-  /// каскадного сужения списка авторов в форме книги.
   Set<int> authorIdsOfPublisher(int publisherId) => {
     for (final b in _books)
       if (!b.isDeleted && b.publisherId == publisherId) ...b.authorIds,

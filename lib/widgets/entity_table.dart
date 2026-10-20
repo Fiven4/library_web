@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Описание одной колонки таблицы. Таблица для любой сущности отличается
-/// только списком таких описаний.
 class TableColumnSpec<T> {
   final String label;
   final String? sortField;
@@ -16,8 +14,6 @@ class TableColumnSpec<T> {
   });
 }
 
-/// Обобщённая таблица записей: сортировка по заголовкам, флажки выбора,
-/// колонка действий и двумерная прокрутка. Используется для книг и авторов.
 class EntityTable<T> extends StatelessWidget {
   final List<TableColumnSpec<T>> columns;
   final List<T> items;
@@ -61,7 +57,6 @@ class EntityTable<T> extends StatelessWidget {
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: ConstrainedBox(
-            // На широком окне таблица занимает всю ширину, а не жмётся влево.
             constraints: BoxConstraints(minWidth: constraints.maxWidth),
             child: DataTable(
               sortColumnIndex: sortIndex < 0 ? null : sortIndex,

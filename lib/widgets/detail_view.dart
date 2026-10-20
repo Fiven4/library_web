@@ -7,7 +7,6 @@ import '../state/entity_detail_notifier.dart';
 import '../state/load_status.dart';
 import 'state_views.dart';
 
-/// Универсальная карточка записи: заголовок, поля, удаление и восстановление.
 class DetailView<T> extends StatelessWidget {
   final EntityDetailNotifier<T> notifier;
   final String listPath;
@@ -29,8 +28,6 @@ class DetailView<T> extends StatelessWidget {
   });
 
   void _back(BuildContext context) {
-    // Если карточку открыли из списка, возвращаемся к нему с теми же условиями;
-    // если по прямой ссылке — к списку без условий.
     if (context.canPop()) {
       context.pop();
     } else {
@@ -64,8 +61,6 @@ class DetailView<T> extends StatelessWidget {
     return answer ?? false;
   }
 
-  /// Выполняет действие над записью; нарушение целостности показывается
-  /// диалогом с числом связанных записей.
   Future<void> _guard(
     BuildContext context,
     Future<void> Function() action,

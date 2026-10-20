@@ -50,7 +50,6 @@ class LocalBookRepository extends LocalRepository<Book, BookQuery>
     authorIds: item.authorIds,
     genreIds: item.genreIds,
     copiesTotal: item.copiesTotal,
-    // Новая книга целиком доступна к выдаче.
     copiesAvailable: item.copiesTotal,
     deletedAt: item.deletedAt,
   );

@@ -4,13 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'storage_notices.dart';
 
-/// Хранение коллекции записей в localStorage (через shared_preferences).
-///
-/// Формат версионируется. Текущая версия лежит под ключом `<коллекция>_v2`
-/// в виде `{"version": 2, "items": [...]}`. Данные старого формата
-/// (`<коллекция>_v1`, голый список) переносятся автоматически. Если данные
-/// нечитаемы, коллекция начинается заново с начального набора и пользователю
-/// показывается сообщение, а приложение не падает.
 class JsonStore<T> {
   JsonStore({
     required this.prefs,
@@ -62,7 +55,6 @@ class JsonStore<T> {
       );
     }
 
-    // Первый запуск.
     final items = List<T>.of(seed);
     save(items);
     return items;
@@ -101,7 +93,6 @@ class JsonStore<T> {
     ];
   }
 
-  /// Записывает коллекцию. Вызывать нужно после каждого изменения.
   Future<void> save(List<T> items) async {
     final payload = jsonEncode({
       'version': currentVersion,

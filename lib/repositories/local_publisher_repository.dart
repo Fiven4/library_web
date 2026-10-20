@@ -85,8 +85,6 @@ class LocalPublisherRepository
     }
   }
 
-  /// Издательство, на которое ссылаются книги, удалить нельзя: сообщение
-  /// содержит число связанных записей.
   @override
   Future<void> checkDeletable(Publisher item, {required bool hard}) async {
     final count =

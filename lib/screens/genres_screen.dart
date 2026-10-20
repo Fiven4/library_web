@@ -8,7 +8,6 @@ import '../widgets/entity_list_view.dart';
 import '../widgets/entity_table.dart';
 import 'books_screen.dart';
 
-/// Список жанров: тот же универсальный список с другим набором колонок.
 class GenresScreen extends StatelessWidget {
   final GenreQuery query;
 

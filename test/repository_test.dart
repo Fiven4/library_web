@@ -26,7 +26,6 @@ void main() {
     });
 
     test('фильтры комбинируются между собой и с поиском', () async {
-      // жанр «Фантастика» (2), издательство «АСТ» (1), год не раньше 1960
       final r = await books.find(
         const BookQuery(genreId: 2, publisherId: 1, yearFrom: 1960, size: 50),
       );
@@ -121,7 +120,7 @@ void main() {
     test('deleteMany удаляет только существующие и ещё не удалённые', () async {
       await books.softDelete(3);
       final count = await books.deleteMany([1, 2, 3, 9999]);
-      expect(count, 2); // 3 уже удалена, 9999 не существует
+      expect(count, 2);
       final r = await books.find(
         const BookQuery(includeDeleted: true, size: 50),
       );

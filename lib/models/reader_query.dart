@@ -1,6 +1,5 @@
 import 'list_query.dart';
 
-/// Статус читательского билета для фильтра списка читателей.
 enum CardStatus { active, expired }
 
 class ReaderQuery extends ListQuery<ReaderQuery> {

@@ -7,7 +7,6 @@ import 'helpers.dart';
 
 Finder field(String key) => find.byKey(ValueKey('field-$key'));
 
-/// Прокручивает форму так, чтобы элемент оказался в центре видимой области.
 Future<void> reveal(WidgetTester t, Finder target) async {
   await Scrollable.ensureVisible(
     t.element(target),
@@ -22,8 +21,6 @@ Future<void> type(WidgetTester t, String key, String text) async {
   await t.pump();
 }
 
-/// Нажимает «Создать»/«Сохранить». Вызов обработчика напрямую надёжнее
-/// нажатия по координатам: кнопка лежит в самом низу прокручиваемой формы.
 Future<void> submit(WidgetTester t) async {
   final button = t.widget<FilledButton>(
     find.byKey(const ValueKey('submit-button')),
@@ -146,7 +143,6 @@ void main() {
         );
         expect(find.text('Изменение: Война и мир'), findsOneWidget);
         expect(find.text('Сохранить'), findsOneWidget);
-        // выбранные значения связей на месте
         final chip = t.widget<FilterChip>(
           find.byKey(const ValueKey('chip-authorIds-1')),
         );
@@ -231,16 +227,13 @@ void main() {
   group('связи в форме книги', () {
     testWidgets('после выбора издательства список авторов сужается', (t) async {
       await pumpApp(t, location: '/books/new');
-      // до выбора издательства доступны все авторы
       expect(find.byKey(const ValueKey('chip-authorIds-1')), findsOneWidget);
       expect(find.byKey(const ValueKey('chip-authorIds-2')), findsOneWidget);
 
       await choose(t, find.byType(DropdownButtonFormField<int>), 'Азбука');
-      // «Азбука» издаёт только Достоевского
       expect(find.byKey(const ValueKey('chip-authorIds-2')), findsOneWidget);
       expect(find.byKey(const ValueKey('chip-authorIds-1')), findsNothing);
 
-      // переключатель показывает всех авторов
       final toggle = find.byKey(const ValueKey('switch-narrowAuthors'));
       await reveal(t, toggle);
       await t.tap(toggle);
@@ -267,7 +260,6 @@ void main() {
       t,
     ) async {
       await pumpApp(t, location: '/publishers');
-      // первая строка по алфавиту — «Азбука»
       await t.tap(find.byTooltip('Действия').first);
       await t.pumpAndSettle();
       await t.tap(find.text('Удалить').last);
@@ -285,12 +277,11 @@ void main() {
 
       await t.tap(find.text('Понятно'));
       await t.pumpAndSettle();
-      expect(find.text('Азбука'), findsOneWidget); // запись на месте
+      expect(find.text('Азбука'), findsOneWidget);
     });
 
     testWidgets('то же из карточки издательства', (t) async {
       await pumpApp(t, location: '/publishers/1');
-      // Кнопка лежит под длинным списком книг: вызываем обработчик напрямую.
       t
           .widget<OutlinedButton>(find.byKey(const ValueKey('detail-delete')))
           .onPressed!();
@@ -321,7 +312,6 @@ void main() {
       expect(field('card.number'), findsOneWidget);
       expect(field('card.issuedAt'), findsOneWidget);
       expect(field('card.expiresAt'), findsOneWidget);
-      // даты предзаполнены: выдача сегодня, срок через год
       final issued = t
           .widget<TextFormField>(field('card.issuedAt'))
           .controller!
@@ -472,7 +462,6 @@ void main() {
       await type(t, 'country', 'Россия');
       await submit(t);
 
-      // «Перезагрузка страницы»: приложение собирается заново на тех же данных.
       await t.pumpWidget(const SizedBox());
       await pumpApp(t, location: '/authors?search=Сохранённый', prefs: prefs);
       expect(find.text('Сохранённый А. А.'), findsOneWidget);

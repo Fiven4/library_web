@@ -6,9 +6,6 @@ import '../models/page_result.dart';
 import '../storage/json_store.dart';
 import 'entity_repository.dart';
 
-/// Общая реализация хранилища записей в памяти с необязательным сохранением
-/// в localStorage. Конкретные репозитории описывают только то, что отличает
-/// сущности друг от друга: отбор, порядок, уникальность и защиту от удаления.
 abstract class LocalRepository<T, Q extends ListQuery<Q>>
     implements EntityRepository<T, Q> {
   LocalRepository({
@@ -23,14 +20,10 @@ abstract class LocalRepository<T, Q extends ListQuery<Q>>
   final DevSettings? _dev;
   final List<T> _items;
 
-  // Репозиторий отдаётся через Provider, поэтому сам не должен быть Listenable:
-  // оповещения вынесены в отдельный объект.
   final _Changes _changes = _Changes();
 
   @override
   Listenable get changes => _changes;
-
-  // ---- что должна описать конкретная сущность ----
 
   int idOf(T item);
   bool isDeletedItem(T item);
@@ -40,17 +33,10 @@ abstract class LocalRepository<T, Q extends ListQuery<Q>>
   int compare(T a, T b, Q query);
   String notFound(int id);
 
-  /// Проверка уникальности. [others] — остальные неудалённые записи.
-  /// Бросает [ValidationException] с ошибками по полям.
   void validate(T candidate, List<T> others) {}
 
-  /// Проверка перед удалением. Бросает [ConflictException].
   Future<void> checkDeletable(T item, {required bool hard}) async {}
 
-  // ---- общая логика ----
-
-  /// Небольшая задержка имитирует сеть: без неё индикатор загрузки
-  /// невозможно увидеть, а при подключении сервера он понадобится по-настоящему.
   Future<void> _simulateNetwork() async {
     await Future.delayed(_dev?.delay ?? Duration.zero);
     if (_dev?.failing ?? false) {
@@ -80,15 +66,12 @@ abstract class LocalRepository<T, Q extends ListQuery<Q>>
 
     rows.sort((a, b) {
       final result = compare(a, b, q);
-      // При равенстве ключей порядок задаёт id, иначе строки «прыгают».
       final ordered = result != 0 ? result : idOf(a).compareTo(idOf(b));
       return q.sortAscending ? ordered : -ordered;
     });
 
     final total = rows.length;
     final from = (q.page - 1) * q.size;
-    // num.clamp возвращает num, а не int, и в sublist его передать нельзя,
-    // поэтому верхнюю границу считаем явно.
     final to = (from + q.size) > total ? total : (from + q.size);
     final items = from >= total ? <T>[] : rows.sublist(from, to);
     return PageResult(items: items, page: q.page, size: q.size, total: total);
@@ -103,7 +86,6 @@ abstract class LocalRepository<T, Q extends ListQuery<Q>>
 
   @override
   Future<List<T>> findAll() async {
-    // Справочное чтение для подписей и списков выбора: без имитации сети.
     return List.unmodifiable(_items);
   }
 
@@ -176,7 +158,7 @@ abstract class LocalRepository<T, Q extends ListQuery<Q>>
       try {
         await checkDeletable(_items[i], hard: false);
       } on ConflictException {
-        continue; // защищённые связями записи пропускаются
+        continue;
       }
       _items[i] = withDeleted(_items[i], DateTime.now());
       count++;

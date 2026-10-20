@@ -35,8 +35,6 @@ class BookQuery extends ListQuery<BookQuery> {
     this.includeDeleted = false,
   });
 
-  /// Восстанавливает условия из параметров адреса. Любое некорректное
-  /// значение заменяется значением по умолчанию.
   factory BookQuery.fromParams(Map<String, String> p) {
     final sort = parseSort(p['sort'], sortFields, 'title');
     return BookQuery(
@@ -54,8 +52,6 @@ class BookQuery extends ListQuery<BookQuery> {
     );
   }
 
-  /// Параметр `_unset` позволяет отличить «не передано» от «передан null,
-  /// сбросить фильтр». Любое изменение условий возвращает на первую страницу.
   BookQuery copyWith({
     String? search,
     Object? genreId = _unset,

@@ -6,14 +6,11 @@ import '../repositories/book_repository.dart';
 import '../repositories/entity_repository.dart';
 import 'load_status.dart';
 
-/// Состояние карточки одной записи. Запись может не существовать
-/// (адрес набран вручную), поэтому «не найдено» — отдельный исход.
 class EntityDetailNotifier<T> extends ChangeNotifier {
   EntityDetailNotifier(this._store, this.id);
 
   final RecordStore<T> _store;
 
-  /// Идентификатор из адреса; null, если в адресе не число.
   final int? id;
 
   T? _item;
@@ -57,7 +54,6 @@ class EntityDetailNotifier<T> extends ChangeNotifier {
     _safeNotify();
   }
 
-  /// Дополнительная загрузка в наследниках (связанные записи).
   @protected
   Future<void> onLoaded() async {}
 
@@ -82,8 +78,6 @@ class BookDetailNotifier extends EntityDetailNotifier<Book> {
   BookDetailNotifier(super.store, super.id);
 }
 
-/// Карточка сущности, на которую ссылаются книги (автор, жанр, издательство):
-/// дополнительно загружает список связанных книг.
 class RelatedBooksNotifier<T> extends EntityDetailNotifier<T> {
   RelatedBooksNotifier(super.store, super.id, this._books, this._queryFor);
 

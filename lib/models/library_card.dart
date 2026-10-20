@@ -1,7 +1,5 @@
 import 'json_utils.dart';
 
-/// Читательский билет. Связь с читателем один к одному: билет не существует
-/// отдельно и редактируется внутри формы читателя.
 class LibraryCard {
   final int id;
   final String number;

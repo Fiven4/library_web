@@ -29,10 +29,6 @@ import '../state/entity_detail_notifier.dart';
 
 int? _id(GoRouterState state) => int.tryParse(state.pathParameters['id'] ?? '');
 
-/// Маршруты одной сущности: список, форма создания, карточка и форма
-/// изменения. Форма создания и изменения — один экран, различие только
-/// в наличии идентификатора. Маршрут /new стоит выше /:id, иначе «new»
-/// был бы принят за идентификатор.
 List<GoRoute> _entityRoutes({
   required String path,
   required Widget Function(GoRouterState state) list,
@@ -51,8 +47,6 @@ List<GoRoute> _entityRoutes({
   ),
 ];
 
-/// Маршруты приложения. Условия отбора списков передаются параметрами адреса:
-/// /books?search=война&genreId=2&sort=year,desc&page=3
 GoRouter createRouter({String initialLocation = '/books'}) {
   return GoRouter(
     initialLocation: initialLocation,
@@ -68,7 +62,6 @@ GoRouter createRouter({String initialLocation = '/books'}) {
                 BooksScreen(query: BookQuery.fromParams(s.uri.queryParameters)),
             form: (id) => BookFormScreen(id: id),
             detail: (context, id) => ChangeNotifierProvider(
-              // Ключ пересоздаёт состояние при переходе к другой записи.
               key: ValueKey('book-$id'),
               create: (context) =>
                   BookDetailNotifier(context.read<BookRepository>(), id)

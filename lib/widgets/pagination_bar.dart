@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/list_query.dart';
 
-/// Панель постраничной навигации: первая, предыдущая, следующая и последняя
-/// страницы, номер текущей, общее число записей и размер страницы.
 class PaginationBar extends StatelessWidget {
   final int page;
   final int totalPages;

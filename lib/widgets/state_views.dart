@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Идёт загрузка.
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
 
@@ -17,7 +16,6 @@ class LoadingView extends StatelessWidget {
   );
 }
 
-/// Произошла ошибка: красный значок и кнопка повторной попытки.
 class ErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
@@ -53,8 +51,6 @@ class ErrorView extends StatelessWidget {
   }
 }
 
-/// Загрузка прошла успешно, но по условиям ничего не найдено.
-/// Это не ошибка, поэтому вид нейтральный и предлагает сбросить условия.
 class EmptyView extends StatelessWidget {
   final String message;
   final VoidCallback? onReset;

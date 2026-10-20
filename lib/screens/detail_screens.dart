@@ -12,7 +12,6 @@ import '../state/entity_detail_notifier.dart';
 import '../state/reference_notifier.dart';
 import '../widgets/detail_view.dart';
 
-/// Карточка книги.
 class BookDetailScreen extends StatelessWidget {
   final int? id;
 
@@ -43,7 +42,6 @@ class BookDetailScreen extends StatelessWidget {
   }
 }
 
-/// Список книг, которые ссылаются на запись (автора, жанр, издательство).
 Widget _relatedBooks(BuildContext context, List<Book> books) => Card(
   margin: EdgeInsets.zero,
   child: Padding(
@@ -70,7 +68,6 @@ Widget _relatedBooks(BuildContext context, List<Book> books) => Card(
   ),
 );
 
-/// Карточка автора со списком его книг.
 class AuthorDetailScreen extends StatelessWidget {
   final int? id;
 
@@ -139,7 +136,6 @@ class PublisherDetailScreen extends StatelessWidget {
   }
 }
 
-/// Карточка читателя с читательским билетом (связь «один к одному»).
 class ReaderDetailScreen extends StatelessWidget {
   final int? id;
 

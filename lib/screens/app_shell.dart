@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import '../core/breakpoints.dart';
 import '../storage/storage_notices.dart';
 
-/// Каркас приложения с адаптивной навигацией: на узком окне нижняя панель,
-/// на широком боковая полоса (раскрытая от 1500 пикселей).
 class AppShell extends StatefulWidget {
   final String location;
   final Widget child;
@@ -38,7 +36,6 @@ class _AppShellState extends State<AppShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _showNotices());
   }
 
-  /// Сообщения хранилища (перенос или сброс данных) показываются один раз.
   void _showNotices() {
     if (!mounted) return;
     final messages = _notices.take();
@@ -71,7 +68,6 @@ class _AppShellState extends State<AppShell> {
       return Scaffold(
         body: SafeArea(child: widget.child),
         bottomNavigationBar: NavigationBarTheme(
-          // Пять разделов: подписи мельче, иначе «Издательства» переносится.
           data: const NavigationBarThemeData(
             labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 10)),
           ),
@@ -88,8 +84,6 @@ class _AppShellState extends State<AppShell> {
       );
     }
 
-    // Раскрытая полоса съедает 176 пикселей у таблицы, поэтому подписи
-    // встают рядом со значками только на очень широком окне.
     final extended = MediaQuery.sizeOf(context).width >= 1500;
     return Scaffold(
       body: Row(
@@ -98,7 +92,6 @@ class _AppShellState extends State<AppShell> {
             selectedIndex: _selectedIndex,
             onDestinationSelected: (i) => _select(context, i),
             extended: extended,
-            // extended и labelType, отличный от none, вместе недопустимы.
             labelType: extended
                 ? NavigationRailLabelType.none
                 : NavigationRailLabelType.all,

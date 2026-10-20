@@ -10,7 +10,6 @@ import '../widgets/entity_table.dart';
 import '../widgets/filter_widgets.dart';
 import 'books_screen.dart';
 
-/// Список авторов: та же универсальная таблица, другой набор колонок.
 class AuthorsScreen extends StatelessWidget {
   final AuthorQuery query;
 
