@@ -1,10 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/api_client.dart';
 import 'core/dev_settings.dart';
+import 'repositories/api_author_repository.dart';
+import 'repositories/api_book_repository.dart';
+import 'repositories/api_genre_repository.dart';
+import 'repositories/api_publisher_repository.dart';
+import 'repositories/api_reader_repository.dart';
 import 'repositories/author_repository.dart';
 import 'repositories/book_repository.dart';
 import 'repositories/genre_repository.dart';
@@ -22,8 +28,16 @@ import 'storage/storage_notices.dart';
 class AppProviders extends StatelessWidget {
   final Widget child;
   final SharedPreferences? prefs;
+  final Dio? dio;
+  final bool useApi;
 
-  const AppProviders({super.key, required this.child, this.prefs});
+  const AppProviders({
+    super.key,
+    required this.child,
+    this.prefs,
+    this.dio,
+    this.useApi = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,44 +45,63 @@ class AppProviders extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => DevSettings()),
         Provider(create: (_) => StorageNotices()),
-        Provider<BookRepository>(
-          create: (context) => LocalBookRepository(
-            prefs: prefs,
-            dev: context.read<DevSettings>(),
-            notices: context.read<StorageNotices>(),
+        if (useApi) ...[
+          Provider<Dio>(create: (_) => dio ?? buildDio()),
+          ProxyProvider<Dio, BookRepository>(
+            update: (_, dioInstance, _) => ApiBookRepository(dioInstance),
           ),
-        ),
-        Provider<AuthorRepository>(
-          create: (context) => LocalAuthorRepository(
-            prefs: prefs,
-            dev: context.read<DevSettings>(),
-            notices: context.read<StorageNotices>(),
-            books: context.read<BookRepository>(),
+          ProxyProvider<Dio, AuthorRepository>(
+            update: (_, dioInstance, _) => ApiAuthorRepository(dioInstance),
           ),
-        ),
-        Provider<GenreRepository>(
-          create: (context) => LocalGenreRepository(
-            prefs: prefs,
-            dev: context.read<DevSettings>(),
-            notices: context.read<StorageNotices>(),
-            books: context.read<BookRepository>(),
+          ProxyProvider<Dio, GenreRepository>(
+            update: (_, dioInstance, _) => ApiGenreRepository(dioInstance),
           ),
-        ),
-        Provider<PublisherRepository>(
-          create: (context) => LocalPublisherRepository(
-            prefs: prefs,
-            dev: context.read<DevSettings>(),
-            notices: context.read<StorageNotices>(),
-            books: context.read<BookRepository>(),
+          ProxyProvider<Dio, PublisherRepository>(
+            update: (_, dioInstance, _) => ApiPublisherRepository(dioInstance),
           ),
-        ),
-        Provider<ReaderRepository>(
-          create: (context) => LocalReaderRepository(
-            prefs: prefs,
-            dev: context.read<DevSettings>(),
-            notices: context.read<StorageNotices>(),
+          ProxyProvider<Dio, ReaderRepository>(
+            update: (_, dioInstance, _) => ApiReaderRepository(dioInstance),
           ),
-        ),
+        ] else ...[
+          Provider<BookRepository>(
+            create: (context) => LocalBookRepository(
+              prefs: prefs,
+              dev: context.read<DevSettings>(),
+              notices: context.read<StorageNotices>(),
+            ),
+          ),
+          Provider<AuthorRepository>(
+            create: (context) => LocalAuthorRepository(
+              prefs: prefs,
+              dev: context.read<DevSettings>(),
+              notices: context.read<StorageNotices>(),
+              books: context.read<BookRepository>(),
+            ),
+          ),
+          Provider<GenreRepository>(
+            create: (context) => LocalGenreRepository(
+              prefs: prefs,
+              dev: context.read<DevSettings>(),
+              notices: context.read<StorageNotices>(),
+              books: context.read<BookRepository>(),
+            ),
+          ),
+          Provider<PublisherRepository>(
+            create: (context) => LocalPublisherRepository(
+              prefs: prefs,
+              dev: context.read<DevSettings>(),
+              notices: context.read<StorageNotices>(),
+              books: context.read<BookRepository>(),
+            ),
+          ),
+          Provider<ReaderRepository>(
+            create: (context) => LocalReaderRepository(
+              prefs: prefs,
+              dev: context.read<DevSettings>(),
+              notices: context.read<StorageNotices>(),
+            ),
+          ),
+        ],
         ChangeNotifierProvider(
           create: (context) => BooksNotifier(context.read<BookRepository>()),
         ),

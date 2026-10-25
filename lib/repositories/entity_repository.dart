@@ -2,23 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/page_result.dart';
 
-class RepositoryException implements Exception {
-  final String message;
-  const RepositoryException(this.message);
-
-  @override
-  String toString() => message;
-}
-
-class ConflictException extends RepositoryException {
-  const ConflictException(super.message);
-}
-
-class ValidationException extends RepositoryException {
-  final Map<String, String> errors;
-
-  ValidationException(this.errors) : super('Ошибка валидации');
-}
+export '../core/api_exceptions.dart';
 
 abstract interface class RecordStore<T> {
   Future<T?> findById(int id);

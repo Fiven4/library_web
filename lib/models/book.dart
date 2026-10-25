@@ -77,11 +77,37 @@ class Book {
     isbn: stringOf(json['isbn']),
     year: intOf(json['year']),
     pages: intOf(json['pages']),
-    publisherId: intOf(json['publisherId']),
-    authorIds: intListOf(json['authorIds']),
-    genreIds: intListOf(json['genreIds']),
+    publisherId: json['publisherId'] != null
+        ? intOf(json['publisherId'])
+        : (json['publisher'] is Map
+            ? intOf((json['publisher'] as Map)['id'])
+            : 0),
+    authorIds: json['authorIds'] != null
+        ? intListOf(json['authorIds'])
+        : (json['authors'] is List
+            ? [
+                for (final a in json['authors'] as List)
+                  if (a is Map)
+                    intOf(a['id'])
+                  else if (a is num)
+                    a.toInt(),
+              ]
+            : const []),
+    genreIds: json['genreIds'] != null
+        ? intListOf(json['genreIds'])
+        : (json['genres'] is List
+            ? [
+                for (final g in json['genres'] as List)
+                  if (g is Map)
+                    intOf(g['id'])
+                  else if (g is num)
+                    g.toInt(),
+              ]
+            : const []),
     copiesTotal: intOf(json['copiesTotal']),
-    copiesAvailable: intOf(json['copiesAvailable']),
+    copiesAvailable: json['copiesAvailable'] != null
+        ? intOf(json['copiesAvailable'])
+        : intOf(json['copiesTotal']),
     deletedAt: dateOf(json['deletedAt']),
   );
 }

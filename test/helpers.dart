@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +11,8 @@ Future<GoRouter> pumpApp(
   String location = '/books',
   Size size = const Size(1440, 900),
   SharedPreferences? prefs,
+  bool useApi = false,
+  Dio? dio,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
@@ -18,6 +21,8 @@ Future<GoRouter> pumpApp(
   await tester.pumpWidget(
     AppProviders(
       prefs: prefs,
+      useApi: useApi,
+      dio: dio,
       child: LibraryApp(router: router),
     ),
   );
