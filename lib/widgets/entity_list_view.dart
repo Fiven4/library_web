@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../core/breakpoints.dart';
 import '../core/debouncer.dart';
 import '../models/list_query.dart';
+import '../models/role.dart';
 import '../repositories/entity_repository.dart';
+import '../state/auth_notifier.dart';
 import '../state/entity_list_notifier.dart';
 import '../state/load_status.dart';
 import 'dev_menu.dart';
@@ -285,6 +288,12 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
   List<Widget> _actions(T item) {
     final id = widget.idOf(item);
     final deleted = widget.isDeleted(item);
+    final auth = Provider.of<AuthNotifier?>(context, listen: false);
+    final canEdit = auth?.has(Role.librarian) ?? true;
+    final canDelete = auth?.has(Role.librarian) ?? true;
+    final canRestore = auth?.has(Role.admin) ?? true;
+    final canHardDelete = auth?.has(Role.admin) ?? true;
+
     return [
       PopupMenuButton<String>(
         key: ValueKey('row-menu-$id'),
@@ -305,12 +314,13 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
         },
         itemBuilder: (_) => [
           const PopupMenuItem(value: 'open', child: Text('Открыть карточку')),
-          const PopupMenuItem(value: 'edit', child: Text('Изменить')),
-          if (!deleted)
+          if (canEdit) const PopupMenuItem(value: 'edit', child: Text('Изменить')),
+          if (!deleted && canDelete)
             const PopupMenuItem(value: 'delete', child: Text('Удалить'))
-          else
+          else if (deleted && canRestore)
             const PopupMenuItem(value: 'restore', child: Text('Восстановить')),
-          const PopupMenuItem(value: 'hard', child: Text('Удалить навсегда')),
+          if (canHardDelete)
+            const PopupMenuItem(value: 'hard', child: Text('Удалить навсегда')),
         ],
       ),
     ];
@@ -340,12 +350,13 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
-              FilledButton.icon(
-                key: const ValueKey('create-button'),
-                onPressed: _create,
-                icon: const Icon(Icons.add),
-                label: const Text('Добавить'),
-              ),
+              if (Provider.of<AuthNotifier?>(context)?.has(Role.librarian) ?? true)
+                FilledButton.icon(
+                  key: const ValueKey('create-button'),
+                  onPressed: _create,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Добавить'),
+                ),
               const SizedBox(width: 4),
               const DevMenu(),
             ],

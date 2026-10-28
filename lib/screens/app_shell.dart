@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/breakpoints.dart';
+import '../models/role.dart';
+import '../state/auth_notifier.dart';
 import '../storage/storage_notices.dart';
 
 class AppShell extends StatefulWidget {
@@ -10,18 +12,6 @@ class AppShell extends StatefulWidget {
   final Widget child;
 
   const AppShell({super.key, required this.location, required this.child});
-
-  static const destinations = [
-    (icon: Icons.menu_book_outlined, label: 'Книги', path: '/books'),
-    (icon: Icons.person_outline, label: 'Авторы', path: '/authors'),
-    (icon: Icons.category_outlined, label: 'Жанры', path: '/genres'),
-    (
-      icon: Icons.apartment_outlined,
-      label: 'Издательства',
-      path: '/publishers',
-    ),
-    (icon: Icons.badge_outlined, label: 'Читатели', path: '/readers'),
-  ];
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -52,28 +42,114 @@ class _AppShellState extends State<AppShell> {
       );
   }
 
-  int get _selectedIndex => AppShell.destinations
-      .indexWhere((d) => widget.location.startsWith(d.path))
-      .clamp(0, AppShell.destinations.length - 1);
+  List<({IconData icon, String label, String path})> _getDestinations(
+    AuthNotifier? auth,
+  ) {
+    final list = <({IconData icon, String label, String path})>[
+      (icon: Icons.menu_book_outlined, label: 'Книги', path: '/books'),
+      (icon: Icons.person_outline, label: 'Авторы', path: '/authors'),
+      (icon: Icons.category_outlined, label: 'Жанры', path: '/genres'),
+      (
+        icon: Icons.apartment_outlined,
+        label: 'Издательства',
+        path: '/publishers',
+      ),
+      (icon: Icons.badge_outlined, label: 'Читатели', path: '/readers'),
+    ];
 
-  void _select(BuildContext context, int index) =>
-      context.go(AppShell.destinations[index].path);
+    if (auth?.has(Role.admin) ?? false) {
+      list.add((
+        icon: Icons.manage_accounts_outlined,
+        label: 'Пользователи',
+        path: '/admin/users',
+      ));
+    }
+    return list;
+  }
+
+  int _getSelectedIndex(
+    List<({IconData icon, String label, String path})> destinations,
+  ) {
+    final idx = destinations.indexWhere((d) => widget.location.startsWith(d.path));
+    return idx >= 0 ? idx : 0;
+  }
+
+  void _showBypassRoleDialog(BuildContext context, AuthNotifier auth) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.bug_report_outlined, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Эксперимент п. 17 (DevTools)'),
+          ],
+        ),
+        content: const Text(
+          'Симуляция подмены роли в браузере (localStorage / DevTools):\n\n'
+          'Интерфейс поверит, что у вас повышенные права, и отобразит запрещённые '
+          'кнопки и разделы. Однако JWT-токен на сервере останется прежним, и при '
+          'попытке выполнить операцию сервер ответит 403 Forbidden.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              auth.resetRoleBypass();
+              Navigator.pop(ctx);
+            },
+            child: const Text('Сбросить к серверной роли'),
+          ),
+          FilledButton.tonal(
+            onPressed: () {
+              auth.simulateClientRoleBypass(Role.librarian);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Подменить на «Библиотекарь»'),
+          ),
+          FilledButton(
+            onPressed: () {
+              auth.simulateClientRoleBypass(Role.admin);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Подменить на «Администратор»'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = screenSizeOf(context);
-    final destinations = AppShell.destinations;
+    final auth = Provider.of<AuthNotifier?>(context);
+    final destinations = _getDestinations(auth);
+    final selectedIndex = _getSelectedIndex(destinations);
+    final user = auth?.user;
 
     if (size == ScreenSize.compact) {
       return Scaffold(
+        appBar: AppBar(
+          title: Text(user != null ? '${user.fullName} (${user.role.label})' : 'Библиотека'),
+          actions: [
+            if (user != null)
+              IconButton(
+                icon: const Icon(Icons.logout),
+                tooltip: 'Выйти',
+                onPressed: () {
+                  auth?.logout();
+                  context.go('/login');
+                },
+              ),
+          ],
+        ),
         body: SafeArea(child: widget.child),
         bottomNavigationBar: NavigationBarTheme(
           data: const NavigationBarThemeData(
             labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 10)),
           ),
           child: NavigationBar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (i) => _select(context, i),
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (i) => context.go(destinations[i].path),
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: [
               for (final d in destinations)
@@ -89,8 +165,8 @@ class _AppShellState extends State<AppShell> {
       body: Row(
         children: [
           NavigationRail(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (i) => _select(context, i),
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (i) => context.go(destinations[i].path),
             extended: extended,
             labelType: extended
                 ? NavigationRailLabelType.none
@@ -105,6 +181,67 @@ class _AppShellState extends State<AppShell> {
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Icon(Icons.local_library_outlined, size: 32),
             ),
+            trailing: user != null
+                ? Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: PopupMenuButton<String>(
+                          tooltip: 'Профиль: ${user.fullName} (${user.role.label})',
+                          icon: CircleAvatar(
+                            radius: 14,
+                            child: Text(
+                              user.username.isNotEmpty ? user.username[0].toUpperCase() : 'U',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          onSelected: (val) {
+                            if (val == 'logout') {
+                              auth?.logout();
+                              context.go('/login');
+                            } else if (val == 'bypass') {
+                              _showBypassRoleDialog(context, auth!);
+                            }
+                          },
+                          itemBuilder: (_) => [
+                            PopupMenuItem(
+                              enabled: false,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(user.fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  Text('${user.username} • ${user.role.label}', style: const TextStyle(fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                            const PopupMenuItem(
+                              value: 'bypass',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.science_outlined, size: 18),
+                                  SizedBox(width: 8),
+                                  Text('Эксперимент п. 17 (DevTools)'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'logout',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.logout, size: 18, color: Colors.red),
+                                  SizedBox(width: 8),
+                                  Text('Выйти из системы', style: TextStyle(color: Colors.red)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
             destinations: [
               for (final d in destinations)
                 NavigationRailDestination(

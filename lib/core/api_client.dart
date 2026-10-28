@@ -4,14 +4,17 @@ import 'package:flutter/foundation.dart';
 import 'api_exceptions.dart';
 import 'config.dart';
 
-Dio buildDio({String? Function()? tokenProvider}) {
+Dio buildDio({
+  String? Function()? tokenProvider,
+  Future<bool> Function()? onRefreshToken,
+}) {
   final dio = Dio(
     BaseOptions(
       baseUrl: apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 15),
       headers: {'Content-Type': 'application/json'},
-      // Не бросать исключение на кодах 4xx — разберём их сами
+      // Не бросать исключение на кодах 4xx — разберём их сами в интерсепторе
       validateStatus: (status) => status != null && status < 500,
     ),
   );
@@ -22,7 +25,7 @@ Dio buildDio({String? Function()? tokenProvider}) {
         final token =
             tokenProvider?.call() ??
             (apiDefaultToken.isNotEmpty ? apiDefaultToken : null);
-        if (token != null) {
+        if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
         }
         if (kDebugMode) {
@@ -38,7 +41,7 @@ Dio buildDio({String? Function()? tokenProvider}) {
           );
         }
 
-        // Коды 4xx попадают сюда, а не в onError, из-за validateStatus.
+        // Коды 4xx попадают сюда из-за validateStatus и перенаправляются в onError (true)
         if (status >= 400) {
           return handler.reject(
             DioException(
@@ -53,8 +56,33 @@ Dio buildDio({String? Function()? tokenProvider}) {
         return handler.next(response);
       },
       onError: (error, handler) async {
-        // Автоматический повтор при сетевом сбое (только для операций чтения GET)
+        final status = error.response?.statusCode;
         final requestOptions = error.requestOptions;
+
+        // Автоматическое обновление токена при коде 401
+        // Условие !path.contains('/auth/') обязательно: без него неудачная попытка входа с
+        // кодом 401 вызовет попытку обновления токена, та тоже вернёт 401, и получится
+        // бесконечный цикл.
+        if (status == 401 &&
+            !requestOptions.path.contains('/auth/') &&
+            onRefreshToken != null) {
+          try {
+            final refreshed = await onRefreshToken();
+            if (refreshed) {
+              final newOptions = requestOptions;
+              final token = tokenProvider?.call();
+              if (token != null) {
+                newOptions.headers['Authorization'] = 'Bearer $token';
+              }
+              final response = await dio.fetch(newOptions);
+              return handler.resolve(response);
+            }
+          } catch (_) {
+            // Ошибка обновления токена
+          }
+        }
+
+        // Автоматический повтор при сетевом сбое (только для операций чтения GET)
         final isGet = requestOptions.method.toUpperCase() == 'GET';
         final isNetworkError =
             error.type != DioExceptionType.badResponse &&
@@ -80,7 +108,6 @@ Dio buildDio({String? Function()? tokenProvider}) {
           }
         }
 
-        // Сюда приходят сетевые сбои, таймауты, коды 5xx и всё, что отклонил обработчик выше
         if (kDebugMode) {
           debugPrint('[API] сбой ${error.requestOptions.uri}: ${error.type}');
         }
