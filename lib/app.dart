@@ -25,7 +25,6 @@ import 'state/auth_notifier.dart';
 import 'state/list_notifiers.dart';
 import 'state/reference_notifier.dart';
 import 'storage/storage_notices.dart';
-import 'widgets/inactivity_watcher.dart';
 
 class AppProviders extends StatelessWidget {
   final Widget child;
@@ -154,9 +153,7 @@ class LibraryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthNotifier?>(context);
-
-    Widget app = MaterialApp.router(
+    return MaterialApp.router(
       title: 'Библиотека',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -172,20 +169,5 @@ class LibraryApp extends StatelessWidget {
       ),
       routerConfig: router,
     );
-
-    if (auth != null && auth.isAuthenticated) {
-      app = InactivityWatcher(
-        timeout: auth.inactivityTimeout,
-        warningDuration: const Duration(seconds: 30),
-        onActivity: auth.recordActivity,
-        onTimeout: () {
-          auth.logout();
-          router.go('/login');
-        },
-        child: app,
-      );
-    }
-
-    return app;
   }
 }

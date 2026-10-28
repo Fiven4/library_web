@@ -6,6 +6,7 @@ import '../core/breakpoints.dart';
 import '../models/role.dart';
 import '../state/auth_notifier.dart';
 import '../storage/storage_notices.dart';
+import '../widgets/inactivity_watcher.dart';
 
 class AppShell extends StatefulWidget {
   final String location;
@@ -126,8 +127,9 @@ class _AppShellState extends State<AppShell> {
     final selectedIndex = _getSelectedIndex(destinations);
     final user = auth?.user;
 
+    final Widget shell;
     if (size == ScreenSize.compact) {
-      return Scaffold(
+      shell = Scaffold(
         appBar: AppBar(
           title: Text(user != null ? '${user.fullName} (${user.role.label})' : 'Библиотека'),
           actions: [
@@ -158,10 +160,9 @@ class _AppShellState extends State<AppShell> {
           ),
         ),
       );
-    }
-
-    final extended = MediaQuery.sizeOf(context).width >= 1500;
-    return Scaffold(
+    } else {
+      final extended = MediaQuery.sizeOf(context).width >= 1500;
+      shell = Scaffold(
       body: Row(
         children: [
           NavigationRail(
@@ -255,5 +256,20 @@ class _AppShellState extends State<AppShell> {
         ],
       ),
     );
+  }
+
+  if (auth != null && auth.isAuthenticated) {
+    return InactivityWatcher(
+      timeout: auth.inactivityTimeout,
+      warningDuration: const Duration(seconds: 30),
+      onActivity: auth.recordActivity,
+      onTimeout: () {
+        auth.logout();
+        context.go('/login');
+      },
+      child: shell,
+    );
+  }
+  return shell;
   }
 }
