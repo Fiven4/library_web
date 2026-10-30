@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'core/api_client.dart';
 import 'core/auth_api.dart';
+import 'core/mock_api_interceptor.dart';
 import 'core/router.dart';
 import 'state/auth_notifier.dart';
 
@@ -18,6 +19,7 @@ Future<void> main() async {
     tokenProvider: () => auth.accessToken,
     onRefreshToken: () => auth.refreshTokens(),
   );
+  dio.interceptors.insert(0, MockApiInterceptor(prefs));
   auth = AuthNotifier(prefs, AuthApi(dio));
   await auth.restore();
 
