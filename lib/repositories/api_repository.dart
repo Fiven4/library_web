@@ -48,7 +48,6 @@ abstract class ApiRepository<T, Q extends ListQuery<Q>>
 
   @override
   Future<PageResult<T>> find(Q query) async {
-    // Отмена устаревших запросов через CancelToken при быстром вводе поиска
     _activeCancelToken?.cancel('superseded');
     final cancelToken = CancelToken();
     _activeCancelToken = cancelToken;
@@ -91,7 +90,6 @@ abstract class ApiRepository<T, Q extends ListQuery<Q>>
 
   @override
   Future<List<T>> findAll() async {
-    // Кэширование справочников: запрашиваются один раз и не перезагружаются при каждом открытии
     if (_cachedAll != null) return _cachedAll!;
 
     return guard(() async {

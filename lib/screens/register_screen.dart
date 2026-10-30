@@ -24,7 +24,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Индикаторы требований к паролю в реальном времени
   String _currentPassword = '';
   bool get _hasMinLength => _currentPassword.length >= 8;
   bool get _hasDigit => RegExp(r'\d').hasMatch(_currentPassword);
@@ -255,7 +254,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 8),
-                      // Интерактивный чек-лист требований к паролю в реальном времени
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(

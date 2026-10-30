@@ -135,7 +135,6 @@ void main() {
         final auth = AuthNotifier(null, AuthApi(dio));
         final router = createRouter(auth: auth);
 
-        // Проверяем, что router создан с refreshListenable
         expect(router, isNotNull);
         expect(auth.isAuthenticated, isFalse);
       },
@@ -185,14 +184,12 @@ void main() {
 
         final dioAdapter = DioAdapter(dio: dio);
 
-        // Первый запрос с устаревшим токеном возвращает 401
         dioAdapter.onGet(
           '/books/1',
           (server) => server.reply(401, {'message': 'Токен истёк'}),
           headers: {'Authorization': 'Bearer old-expired-token'},
         );
 
-        // Повторный запрос с новым токеном возвращает 200 OK
         dioAdapter.onGet(
           '/books/1',
           (server) => server.reply(200, {'id': 1, 'title': 'Война и мир'}),
@@ -231,7 +228,6 @@ void main() {
               dio.post('/auth/login', data: {'username': 'u', 'password': 'p'}),
           throwsA(isA<DioException>()),
         );
-        // Убеждаемся, что интерсептор НЕ пытался обновлять токен для auth-маршрута
         expect(refreshCallCount, 0);
       },
     );
@@ -246,8 +242,6 @@ void main() {
           final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8080/api'));
           final dioAdapter = DioAdapter(dio: dio);
 
-          // Сервер проверяет криптографическую подпись токена.
-          // Читатель подменил роль в клиенте, но токен выдан для роли reader!
           dioAdapter.onGet(
             '/users',
             (server) => server.reply(403, {
@@ -257,18 +251,12 @@ void main() {
           );
 
           final auth = AuthNotifier(null, AuthApi(dio));
-          // Исходное состояние: читатель
           auth.simulateClientRoleBypass(Role.reader);
           expect(auth.has(Role.admin), isFalse);
 
-          // Пользователь в DevTools подменяет роль на admin:
           auth.simulateClientRoleBypass(Role.admin);
-          expect(
-            auth.has(Role.admin),
-            isTrue,
-          ); // Клиентский интерфейс «поверил»
+          expect(auth.has(Role.admin), isTrue);
 
-          // Однако при попытке сделать реальный запрос к серверу:
           try {
             await dio.get(
               '/users',

@@ -41,7 +41,6 @@ void main() {
       await tester.pumpWidget(
         AppProviders(child: LibraryApp(router: createRouter())),
       );
-      // При первой отрисовке до завершения асинхронной загрузки виден индикатор
       await tester.pump(const Duration(milliseconds: 50));
       expect(find.text('Загрузка…'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsWidgets);
@@ -87,7 +86,6 @@ void main() {
       );
       expect(find.text('Повторить'), findsOneWidget);
 
-      // Восстановление связи и повтор запроса без перезагрузки страницы
       dev.failing = false;
       await tester.tap(find.text('Повторить'));
       await tester.pumpAndSettle();
@@ -101,14 +99,12 @@ void main() {
     ) async {
       await pumpApp(tester, location: '/books/new');
 
-      // Нажимаем «Сохранить» при пустых полях формы
       final button = tester.widget<FilledButton>(
         find.byKey(const ValueKey('submit-button')),
       );
       button.onPressed!();
       await tester.pumpAndSettle();
 
-      // Проверяем отображение сообщений об ошибках валидации
       expect(find.text('Укажите название'), findsOneWidget);
       expect(find.text('Выберите издательство'), findsOneWidget);
       expect(find.text('Укажите год'), findsOneWidget);
@@ -149,17 +145,13 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
 
-        // Кнопка «Добавить» скрыта для читателя (требует роль librarian)
         expect(find.byKey(const ValueKey('create-button')), findsNothing);
 
-        // Переключаем роль на Библиотекаря (librarian) через DevTools-эксперимент
         auth.simulateClientRoleBypass(Role.librarian);
         await tester.pump();
 
-        // Кнопка «Добавить» теперь видна
         expect(find.byKey(const ValueKey('create-button')), findsOneWidget);
 
-        // Очищаем дерево виджетов для корректного снятия фоновых таймеров
         await tester.pumpWidget(const SizedBox());
       },
     );

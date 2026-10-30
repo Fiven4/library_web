@@ -30,16 +30,13 @@ class _InactivityWatcherState extends State<InactivityWatcher> {
   @override
   void initState() {
     super.initState();
-    // Клавиатуру слушаем глобально через HardwareKeyboard.
-    // Виджет KeyboardListener здесь не подошёл бы: он сообщает о нажатиях,
-    // только когда его FocusNode в фокусе, а у обёртки над всем приложением фокуса нет.
     HardwareKeyboard.instance.addHandler(_onKey);
     _restart();
   }
 
   bool _onKey(KeyEvent event) {
     _restart();
-    return false; // false означает «событие не обработано, передайте его дальше»
+    return false;
   }
 
   void _restart() {
@@ -52,7 +49,6 @@ class _InactivityWatcherState extends State<InactivityWatcher> {
 
     widget.onActivity?.call();
 
-    // Предупреждение за warningDuration до выхода
     final warningTime = widget.timeout - widget.warningDuration;
     if (warningTime > Duration.zero) {
       _warningTimer = Timer(warningTime, _showWarningDialog);
@@ -112,7 +108,6 @@ class _InactivityWatcherState extends State<InactivityWatcher> {
   @override
   Widget build(BuildContext context) {
     return Listener(
-      // Перехват без поглощения: событие идёт дальше к виджетам
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => _restart(),
       onPointerMove: (_) => _restart(),

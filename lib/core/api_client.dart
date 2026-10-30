@@ -14,7 +14,6 @@ Dio buildDio({
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 15),
       headers: {'Content-Type': 'application/json'},
-      // Не бросать исключение на кодах 4xx — разберём их сами в интерсепторе
       validateStatus: (status) => status != null && status < 500,
     ),
   );
@@ -41,7 +40,6 @@ Dio buildDio({
           );
         }
 
-        // Коды 4xx попадают сюда из-за validateStatus и перенаправляются в onError (true)
         if (status >= 400) {
           return handler.reject(
             DioException(
@@ -59,10 +57,6 @@ Dio buildDio({
         final status = error.response?.statusCode;
         final requestOptions = error.requestOptions;
 
-        // Автоматическое обновление токена при коде 401
-        // Условие !path.contains('/auth/') обязательно: без него неудачная попытка входа с
-        // кодом 401 вызовет попытку обновления токена, та тоже вернёт 401, и получится
-        // бесконечный цикл.
         if (status == 401 &&
             !requestOptions.path.contains('/auth/') &&
             onRefreshToken != null) {
@@ -77,12 +71,9 @@ Dio buildDio({
               final response = await dio.fetch(newOptions);
               return handler.resolve(response);
             }
-          } catch (_) {
-            // Ошибка обновления токена
-          }
+          } catch (_) {}
         }
 
-        // Автоматический повтор при сетевом сбое (только для операций чтения GET)
         final isGet = requestOptions.method.toUpperCase() == 'GET';
         final isNetworkError =
             error.type != DioExceptionType.badResponse &&
@@ -93,7 +84,7 @@ Dio buildDio({
         if (isGet && isNetworkError && retryCount < maxRetries) {
           final nextRetry = retryCount + 1;
           requestOptions.extra['retry_count'] = nextRetry;
-          final delayMs = 500 * (1 << retryCount); // 500мс, 1000мс, 2000мс
+          final delayMs = 500 * (1 << retryCount);
           if (kDebugMode) {
             debugPrint(
               '[API] Повтор чтения ($nextRetry/$maxRetries) через $delayMs мс: ${requestOptions.uri}',

@@ -18,7 +18,7 @@ class AuthNotifier extends ChangeNotifier {
   final AuthApi _api;
 
   AppUser? _user;
-  AppUser? _actualServerUser; // для возврата после эксперимента с подменой роли
+  AppUser? _actualServerUser;
   String? _accessToken;
   String? _refreshToken;
   DateTime? _sessionStart;
@@ -41,8 +41,6 @@ class AuthNotifier extends ChangeNotifier {
 
   bool has(Role role) => _user != null && _user!.role.level >= role.level;
 
-  /// Восстановление сессии при запуске приложения.
-  /// Вызывается один раз до построения дерева виджетов.
   Future<void> restore() async {
     final access = _prefs?.getString(_kAccess);
     final refresh = _prefs?.getString(_kRefresh);
@@ -57,7 +55,6 @@ class AuthNotifier extends ChangeNotifier {
       _lastActivity = DateTime.fromMillisecondsSinceEpoch(lastActivityMs);
     }
 
-    // Проверка предельной длительности сессии
     if (_sessionStart != null &&
         DateTime.now().difference(_sessionStart!) > maxSessionDuration) {
       await logout();
@@ -66,7 +63,6 @@ class AuthNotifier extends ChangeNotifier {
       return;
     }
 
-    // Проверка таймаута неактивности через перезагрузку
     if (_lastActivity != null &&
         DateTime.now().difference(_lastActivity!) > inactivityTimeout) {
       await logout();
@@ -109,9 +105,7 @@ class AuthNotifier extends ChangeNotifier {
       } else {
         await logout();
       }
-    } catch (_) {
-      // Сервер временно недоступен: сессию не сбрасываем, оставляем кэшированного пользователя
-    }
+    } catch (_) {}
 
     _isInitialized = true;
     notifyListeners();
@@ -147,7 +141,6 @@ class AuthNotifier extends ChangeNotifier {
       email: email,
       fullName: fullName,
     );
-    // Сразу авторизуем после регистрации
     await login(username, password);
   }
 
@@ -210,10 +203,6 @@ class AuthNotifier extends ChangeNotifier {
     await _prefs?.setString(_kUser, jsonEncode(user.toJson()));
   }
 
-  // ──────────────────────────── Эксперимент п. 17 ────────────────────────────
-  // Симуляция подмены роли в DevTools / localStorage на стороне клиента.
-  // Это изменяет только локальное представление пользователя в браузере,
-  // в то время как JWT токен остаётся подписан сервером под исходной ролью.
   void simulateClientRoleBypass(Role fakeRole) {
     _actualServerUser ??= _user;
     if (_user == null) {

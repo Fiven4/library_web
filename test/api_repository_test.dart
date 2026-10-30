@@ -202,17 +202,13 @@ void main() {
 
         expect(first.length, 1);
         expect(second.length, 1);
-        expect(
-          requestCount,
-          1,
-        ); // Запрос к серверу ушёл только один раз благодаря кэшу
+        expect(requestCount, 1);
 
-        // Инвалидация кэша
         repo.invalidateCache();
 
         final third = await repo.findAll();
         expect(third.length, 1);
-        expect(requestCount, 2); // После сброса кэша ушёл новый запрос
+        expect(requestCount, 2);
       },
     );
 
@@ -229,11 +225,9 @@ void main() {
           }),
         );
 
-        // Запускаем два поиска подряд
         final f1 = repo.find(const BookQuery(search: 'в'));
         final f2 = repo.find(const BookQuery(search: 'война'));
 
-        // Первый запрос отменяется через CancelToken
         try {
           await f1;
         } catch (e) {

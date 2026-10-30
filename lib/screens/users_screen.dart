@@ -102,7 +102,6 @@ class _UsersScreenState extends State<UsersScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Панель статистики
             Row(
               children: [
                 Expanded(
@@ -203,7 +202,6 @@ class _UsersScreenState extends State<UsersScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            // Поиск пользователей
             TextField(
               decoration: const InputDecoration(
                 hintText: 'Поиск пользователей по логину, имени или email...',

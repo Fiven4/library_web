@@ -12,36 +12,30 @@ sealed class ApiException extends RepositoryException {
   const ApiException(super.message);
 }
 
-/// Нет соединения, таймаут, сервер недоступен, заблокировано CORS
 class NetworkException extends ApiException {
   const NetworkException([
     super.message = 'Сервер недоступен. Проверьте соединение.',
   ]);
 }
 
-/// 401 — не аутентифицирован либо срок действия токена истёк
 class UnauthorizedException extends ApiException {
   const UnauthorizedException([super.message = 'Требуется вход в систему.']);
 }
 
-/// 403 — роль не позволяет выполнить операцию
 class ForbiddenException extends ApiException {
   const ForbiddenException([
     super.message = 'Недостаточно прав для этого действия.',
   ]);
 }
 
-/// 404
 class NotFoundException extends ApiException {
   const NotFoundException([super.message = 'Запись не найдена.']);
 }
 
-/// 409 — нарушено ограничение целостности
 class ConflictException extends ApiException {
   const ConflictException([super.message = 'Операция невозможна.']);
 }
 
-/// 422 — ошибки валидации по полям
 class ValidationException extends ApiException {
   final Map<String, String> errors;
 
@@ -54,7 +48,6 @@ class ValidationException extends ApiException {
        super(messageOrErrors is String ? messageOrErrors : 'Ошибка валидации');
 }
 
-/// 5xx
 class ServerException extends ApiException {
   const ServerException([
     super.message = 'Ошибка на сервере. Попробуйте позже.',
@@ -84,7 +77,6 @@ ApiException mapHttpError(int status, dynamic body) {
 }
 
 ApiException mapDioError(DioException e) {
-  // Если исключение уже разобрал интерсептор, повторно его не разбираем.
   final existing = e.error;
   if (existing is ApiException) return existing;
 

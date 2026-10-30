@@ -71,13 +71,11 @@ GoRouter createRouter({String initialLocation = '/books', AuthNotifier? auth}) {
       final target = state.matchedLocation;
       final isPublic = target == '/login' || target == '/register';
 
-      // Не вошёл и идёт на закрытый экран — на вход, запомнив from
       if (!loggedIn && !isPublic) {
         final from = Uri.encodeComponent(state.uri.toString());
         return '/login?from=$from';
       }
 
-      // Уже вошёл и идёт на экран входа/регистрации — на главную
       if (loggedIn && isPublic) {
         return '/books';
       }

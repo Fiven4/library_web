@@ -93,9 +93,7 @@ class AuthApi {
     if (refreshToken == null) return;
     try {
       await dio.post('/auth/logout', data: {'refreshToken': refreshToken});
-    } catch (_) {
-      // Игнорируем сетевые сбои при выходе
-    }
+    } catch (_) {}
   }
 
   Object _wrapError(DioException e) {
