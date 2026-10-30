@@ -314,7 +314,8 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
         },
         itemBuilder: (_) => [
           const PopupMenuItem(value: 'open', child: Text('Открыть карточку')),
-          if (canEdit) const PopupMenuItem(value: 'edit', child: Text('Изменить')),
+          if (canEdit)
+            const PopupMenuItem(value: 'edit', child: Text('Изменить')),
           if (!deleted && canDelete)
             const PopupMenuItem(value: 'delete', child: Text('Удалить'))
           else if (deleted && canRestore)
@@ -339,68 +340,76 @@ class _EntityListViewState<T, Q extends ListQuery<Q>>
 
     return Padding(
       padding: EdgeInsets.all(compact ? 12 : 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1440),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                  if (Provider.of<AuthNotifier?>(
+                        context,
+                      )?.has(Role.librarian) ??
+                      true)
+                    FilledButton.icon(
+                      key: const ValueKey('create-button'),
+                      onPressed: _create,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Добавить'),
+                    ),
+                  const SizedBox(width: 4),
+                  const DevMenu(),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildToolbar(compact, query, sortable),
+              const SizedBox(height: 8),
+              ListenableBuilder(
+                listenable: _notifier,
+                builder: (context, _) => _notifier.hasSelection
+                    ? _SelectionBar(
+                        count: _notifier.selected.length,
+                        onClear: _notifier.clearSelection,
+                        onDelete: _deleteSelected,
+                      )
+                    : const SizedBox.shrink(),
+              ),
               Expanded(
-                child: Text(
-                  widget.title,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                child: ListenableBuilder(
+                  listenable: _notifier,
+                  builder: (context, _) => _buildContent(compact),
                 ),
               ),
-              if (Provider.of<AuthNotifier?>(context)?.has(Role.librarian) ?? true)
-                FilledButton.icon(
-                  key: const ValueKey('create-button'),
-                  onPressed: _create,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Добавить'),
-                ),
-              const SizedBox(width: 4),
-              const DevMenu(),
+              ListenableBuilder(
+                listenable: _notifier,
+                builder: (context, _) {
+                  final n = _notifier;
+                  if (n.status == LoadStatus.error || n.result.total == 0) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: PaginationBar(
+                      page: n.result.page,
+                      totalPages: n.result.totalPages,
+                      total: n.result.total,
+                      size: n.result.size,
+                      onPage: (p) => _go(widget.query.withPage(p)),
+                      onSize: (s) => _go(widget.query.withSize(s)),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          _buildToolbar(compact, query, sortable),
-          const SizedBox(height: 8),
-          ListenableBuilder(
-            listenable: _notifier,
-            builder: (context, _) => _notifier.hasSelection
-                ? _SelectionBar(
-                    count: _notifier.selected.length,
-                    onClear: _notifier.clearSelection,
-                    onDelete: _deleteSelected,
-                  )
-                : const SizedBox.shrink(),
-          ),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _notifier,
-              builder: (context, _) => _buildContent(compact),
-            ),
-          ),
-          ListenableBuilder(
-            listenable: _notifier,
-            builder: (context, _) {
-              final n = _notifier;
-              if (n.status == LoadStatus.error || n.result.total == 0) {
-                return const SizedBox.shrink();
-              }
-              return Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: PaginationBar(
-                  page: n.result.page,
-                  totalPages: n.result.totalPages,
-                  total: n.result.total,
-                  size: n.result.size,
-                  onPage: (p) => _go(widget.query.withPage(p)),
-                  onSize: (s) => _go(widget.query.withSize(s)),
-                ),
-              );
-            },
-          ),
-        ],
+        ),
       ),
     );
   }

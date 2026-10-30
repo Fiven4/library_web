@@ -44,7 +44,8 @@ class AppProviders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveDio = dio ??
+    final effectiveDio =
+        dio ??
         buildDio(
           tokenProvider: () => authNotifier?.accessToken,
           onRefreshToken: () =>
@@ -159,6 +160,9 @@ class LibraryApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
+        dialogTheme: const DialogThemeData(
+          constraints: BoxConstraints(maxWidth: 560),
+        ),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -166,6 +170,9 @@ class LibraryApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+        dialogTheme: const DialogThemeData(
+          constraints: BoxConstraints(maxWidth: 560),
+        ),
       ),
       routerConfig: router,
     );

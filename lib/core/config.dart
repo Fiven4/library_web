@@ -3,7 +3,4 @@ const apiBaseUrl = String.fromEnvironment(
   defaultValue: 'http://localhost:8080/api',
 );
 
-const apiDefaultToken = String.fromEnvironment(
-  'API_TOKEN',
-  defaultValue: '',
-);
+const apiDefaultToken = String.fromEnvironment('API_TOKEN', defaultValue: '');

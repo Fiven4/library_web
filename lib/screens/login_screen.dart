@@ -149,8 +149,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           prefixIcon: Icon(Icons.person_outline),
                           border: OutlineInputBorder(),
                         ),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? 'Введите логин' : null,
+                        validator: (v) => v == null || v.trim().isEmpty
+                            ? 'Введите логин'
+                            : null,
                         textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 16),
@@ -193,11 +194,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Войти', style: TextStyle(fontSize: 16)),
+                            : const Text(
+                                'Войти',
+                                style: TextStyle(fontSize: 16),
+                              ),
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           const Text('Нет учётной записи?'),
                           TextButton(
@@ -234,7 +239,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _fillCredentials('librarian', 'librarian123'),
                           ),
                           ActionChip(
-                            avatar: const Icon(Icons.admin_panel_settings, size: 16),
+                            avatar: const Icon(
+                              Icons.admin_panel_settings,
+                              size: 16,
+                            ),
                             label: const Text('Администратор'),
                             onPressed: () =>
                                 _fillCredentials('admin', 'admin123'),

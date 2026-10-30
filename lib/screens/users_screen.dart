@@ -44,7 +44,8 @@ class _UsersScreenState extends State<UsersScreen> {
     } catch (e) {
       setState(() {
         if (e is ForbiddenException) {
-          _errorMessage = 'Доступ к разделу пользователей запрещён сервером (403 Forbidden).';
+          _errorMessage =
+              'Доступ к разделу пользователей запрещён сервером (403 Forbidden).';
         } else if (e is ApiException) {
           _errorMessage = e.message;
         } else {
@@ -111,9 +112,17 @@ class _UsersScreenState extends State<UsersScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Всего пользователей', style: theme.textTheme.labelMedium),
+                          Text(
+                            'Всего пользователей',
+                            style: theme.textTheme.labelMedium,
+                          ),
                           const SizedBox(height: 4),
-                          Text('${_users.length}', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          Text(
+                            '${_users.length}',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -149,7 +158,10 @@ class _UsersScreenState extends State<UsersScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Библиотекари', style: theme.textTheme.labelMedium),
+                          Text(
+                            'Библиотекари',
+                            style: theme.textTheme.labelMedium,
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             '${_users.where((u) => u.role == Role.librarian).length}',
@@ -171,7 +183,10 @@ class _UsersScreenState extends State<UsersScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Администраторы', style: theme.textTheme.labelMedium),
+                          Text(
+                            'Администраторы',
+                            style: theme.textTheme.labelMedium,
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             '${_users.where((u) => u.role == Role.admin).length}',
@@ -213,16 +228,16 @@ class _UsersScreenState extends State<UsersScreen> {
                     Expanded(
                       child: Text(
                         _errorMessage!,
-                        style: TextStyle(color: theme.colorScheme.onErrorContainer),
+                        style: TextStyle(
+                          color: theme.colorScheme.onErrorContainer,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             if (_isLoading)
-              const Expanded(
-                child: Center(child: CircularProgressIndicator()),
-              )
+              const Expanded(child: Center(child: CircularProgressIndicator()))
             else if (_errorMessage == null)
               Expanded(
                 child: Card(
@@ -247,12 +262,24 @@ class _UsersScreenState extends State<UsersScreen> {
                             return DataRow(
                               cells: [
                                 DataCell(Text('#${user.id}')),
-                                DataCell(Text(user.username, style: const TextStyle(fontWeight: FontWeight.w600))),
+                                DataCell(
+                                  Text(
+                                    user.username,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
                                 DataCell(Text(user.fullName)),
-                                DataCell(Text(user.email.isEmpty ? '—' : user.email)),
+                                DataCell(
+                                  Text(user.email.isEmpty ? '—' : user.email),
+                                ),
                                 DataCell(
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: roleColor.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(12),
@@ -268,7 +295,13 @@ class _UsersScreenState extends State<UsersScreen> {
                                     ),
                                   ),
                                 ),
-                                DataCell(Text(user.readerId != null ? '№${user.readerId}' : '—')),
+                                DataCell(
+                                  Text(
+                                    user.readerId != null
+                                        ? '№${user.readerId}'
+                                        : '—',
+                                  ),
+                                ),
                               ],
                             );
                           }).toList(),

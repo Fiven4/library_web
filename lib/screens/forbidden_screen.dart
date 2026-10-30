@@ -14,9 +14,7 @@ class ForbiddenScreen extends StatelessWidget {
     final roleName = auth.user?.role.label ?? 'Гость';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Доступ ограничен'),
-      ),
+      appBar: AppBar(title: const Text('Доступ ограничен')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -35,7 +33,9 @@ class ForbiddenScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.errorContainer.withValues(alpha: 0.4),
+                        color: theme.colorScheme.errorContainer.withValues(
+                          alpha: 0.4,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(

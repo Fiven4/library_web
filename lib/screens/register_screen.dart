@@ -181,8 +181,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           border: OutlineInputBorder(),
                         ),
                         validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Введите логин';
-                          if (v.trim().length < 3) return 'Не менее 3 символов';
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Введите логин';
+                          }
+                          if (v.trim().length < 3) {
+                            return 'Не менее 3 символов';
+                          }
                           return null;
                         },
                         textInputAction: TextInputAction.next,
@@ -209,8 +213,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         validator: (v) {
                           if (v != null && v.trim().isNotEmpty) {
-                            if (!RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$')
-                                .hasMatch(v.trim())) {
+                            if (!RegExp(
+                              r'^[\w.+-]+@[\w-]+\.[\w.-]+$',
+                            ).hasMatch(v.trim())) {
                               return 'Некорректный формат email';
                             }
                           }
@@ -239,8 +244,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'Введите пароль';
-                          if (!_isPasswordValid) return 'Пароль не отвечает требованиям безопасности';
+                          if (v == null || v.isEmpty) {
+                            return 'Введите пароль';
+                          }
+                          if (!_isPasswordValid) {
+                            return 'Пароль не отвечает требованиям безопасности';
+                          }
                           return null;
                         },
                         textInputAction: TextInputAction.next,
@@ -250,7 +259,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                          color: theme.colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: _isPasswordValid
@@ -268,9 +278,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            _buildRequirement('Не менее 8 символов', _hasMinLength),
+                            _buildRequirement(
+                              'Не менее 8 символов',
+                              _hasMinLength,
+                            ),
                             _buildRequirement('Хотя бы одна цифра', _hasDigit),
-                            _buildRequirement('Хотя бы один спецсимвол (!@#\$%^&*...)', _hasSpecialChar),
+                            _buildRequirement(
+                              'Хотя бы один спецсимвол (!@#\$%^&*...)',
+                              _hasSpecialChar,
+                            ),
                           ],
                         ),
                       ),
@@ -308,11 +324,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Зарегистрироваться', style: TextStyle(fontSize: 16)),
+                            : const Text(
+                                'Зарегистрироваться',
+                                style: TextStyle(fontSize: 16),
+                              ),
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           const Text('Уже есть аккаунт?'),
                           TextButton(

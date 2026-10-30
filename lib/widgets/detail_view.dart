@@ -167,16 +167,36 @@ class DetailView<T> extends StatelessWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(
-                                width: 140,
-                                child: Text(
-                                  label,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                              if (screenSizeOf(context) == ScreenSize.compact)
+                                Expanded(
+                                  child: Wrap(
+                                    runSpacing: 4,
+                                    children: [
+                                      Text(
+                                        '$label: ',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                      value,
+                                    ],
+                                  ),
+                                )
+                              else ...[
+                                SizedBox(
+                                  width: 140,
+                                  child: Text(
+                                    label,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Expanded(child: value),
+                                Expanded(child: value),
+                              ],
                             ],
                           ),
                         ),

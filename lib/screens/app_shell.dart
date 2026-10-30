@@ -71,7 +71,9 @@ class _AppShellState extends State<AppShell> {
   int _getSelectedIndex(
     List<({IconData icon, String label, String path})> destinations,
   ) {
-    final idx = destinations.indexWhere((d) => widget.location.startsWith(d.path));
+    final idx = destinations.indexWhere(
+      (d) => widget.location.startsWith(d.path),
+    );
     return idx >= 0 ? idx : 0;
   }
 
@@ -131,7 +133,11 @@ class _AppShellState extends State<AppShell> {
     if (size == ScreenSize.compact) {
       shell = Scaffold(
         appBar: AppBar(
-          title: Text(user != null ? '${user.fullName} (${user.role.label})' : 'Библиотека'),
+          title: Text(
+            user != null
+                ? '${user.fullName} (${user.role.label})'
+                : 'Библиотека',
+          ),
           actions: [
             if (user != null)
               IconButton(
@@ -163,113 +169,134 @@ class _AppShellState extends State<AppShell> {
     } else {
       final extended = MediaQuery.sizeOf(context).width >= 1500;
       shell = Scaffold(
-      body: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: selectedIndex,
-            onDestinationSelected: (i) => context.go(destinations[i].path),
-            extended: extended,
-            labelType: extended
-                ? NavigationRailLabelType.none
-                : NavigationRailLabelType.all,
-            minWidth: 72,
-            selectedLabelTextStyle: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-            unselectedLabelTextStyle: const TextStyle(fontSize: 11),
-            leading: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Icon(Icons.local_library_outlined, size: 32),
-            ),
-            trailing: user != null
-                ? Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: PopupMenuButton<String>(
-                          tooltip: 'Профиль: ${user.fullName} (${user.role.label})',
-                          icon: CircleAvatar(
-                            radius: 14,
-                            child: Text(
-                              user.username.isNotEmpty ? user.username[0].toUpperCase() : 'U',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        body: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (i) => context.go(destinations[i].path),
+              extended: extended,
+              labelType: extended
+                  ? NavigationRailLabelType.none
+                  : NavigationRailLabelType.all,
+              minWidth: 72,
+              selectedLabelTextStyle: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+              unselectedLabelTextStyle: const TextStyle(fontSize: 11),
+              leading: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Icon(Icons.local_library_outlined, size: 32),
+              ),
+              trailing: user != null
+                  ? Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: PopupMenuButton<String>(
+                            tooltip:
+                                'Профиль: ${user.fullName} (${user.role.label})',
+                            icon: CircleAvatar(
+                              radius: 14,
+                              child: Text(
+                                user.username.isNotEmpty
+                                    ? user.username[0].toUpperCase()
+                                    : 'U',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
+                            onSelected: (val) {
+                              if (val == 'logout') {
+                                auth?.logout();
+                                context.go('/login');
+                              } else if (val == 'bypass') {
+                                _showBypassRoleDialog(context, auth!);
+                              }
+                            },
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                enabled: false,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      user.fullName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${user.username} • ${user.role.label}',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuDivider(),
+                              const PopupMenuItem(
+                                value: 'bypass',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.science_outlined, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('Эксперимент п. 17 (DevTools)'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'logout',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.logout,
+                                      size: 18,
+                                      color: Colors.red,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Выйти из системы',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          onSelected: (val) {
-                            if (val == 'logout') {
-                              auth?.logout();
-                              context.go('/login');
-                            } else if (val == 'bypass') {
-                              _showBypassRoleDialog(context, auth!);
-                            }
-                          },
-                          itemBuilder: (_) => [
-                            PopupMenuItem(
-                              enabled: false,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(user.fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  Text('${user.username} • ${user.role.label}', style: const TextStyle(fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuDivider(),
-                            const PopupMenuItem(
-                              value: 'bypass',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.science_outlined, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Эксперимент п. 17 (DevTools)'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'logout',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.logout, size: 18, color: Colors.red),
-                                  SizedBox(width: 8),
-                                  Text('Выйти из системы', style: TextStyle(color: Colors.red)),
-                                ],
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                    ),
-                  )
-                : null,
-            destinations: [
-              for (final d in destinations)
-                NavigationRailDestination(
-                  icon: Icon(d.icon),
-                  label: Text(d.label),
-                ),
-            ],
-          ),
-          const VerticalDivider(width: 1),
-          Expanded(child: SafeArea(child: widget.child)),
-        ],
-      ),
-    );
-  }
+                    )
+                  : null,
+              destinations: [
+                for (final d in destinations)
+                  NavigationRailDestination(
+                    icon: Icon(d.icon),
+                    label: Text(d.label),
+                  ),
+              ],
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(child: SafeArea(child: widget.child)),
+          ],
+        ),
+      );
+    }
 
-  if (auth != null && auth.isAuthenticated) {
-    return InactivityWatcher(
-      timeout: auth.inactivityTimeout,
-      warningDuration: const Duration(seconds: 30),
-      onActivity: auth.recordActivity,
-      onTimeout: () {
-        auth.logout();
-        context.go('/login');
-      },
-      child: shell,
-    );
-  }
-  return shell;
+    if (auth != null && auth.isAuthenticated) {
+      return InactivityWatcher(
+        timeout: auth.inactivityTimeout,
+        warningDuration: const Duration(seconds: 30),
+        onActivity: auth.recordActivity,
+        onTimeout: () {
+          auth.logout();
+          context.go('/login');
+        },
+        child: shell,
+      );
+    }
+    return shell;
   }
 }

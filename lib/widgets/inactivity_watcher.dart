@@ -76,7 +76,11 @@ class _InactivityWatcherState extends State<InactivityWatcher> {
       barrierDismissible: false,
       builder: (dialogContext) {
         return AlertDialog(
-          icon: const Icon(Icons.timer_outlined, color: Colors.orange, size: 40),
+          icon: const Icon(
+            Icons.timer_outlined,
+            color: Colors.orange,
+            size: 40,
+          ),
           title: const Text('Предупреждение о неактивности'),
           content: Text(
             'Вы не совершали действий. Сессия будет завершена через '

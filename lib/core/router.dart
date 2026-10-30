@@ -61,10 +61,7 @@ List<GoRoute> _entityRoutes({
   ),
 ];
 
-GoRouter createRouter({
-  String initialLocation = '/books',
-  AuthNotifier? auth,
-}) {
+GoRouter createRouter({String initialLocation = '/books', AuthNotifier? auth}) {
   return GoRouter(
     initialLocation: initialLocation,
     refreshListenable: auth,
@@ -92,14 +89,8 @@ GoRouter createRouter({
         path: '/login',
         builder: (c, s) => LoginScreen(from: s.uri.queryParameters['from']),
       ),
-      GoRoute(
-        path: '/register',
-        builder: (c, s) => const RegisterScreen(),
-      ),
-      GoRoute(
-        path: '/forbidden',
-        builder: (c, s) => const ForbiddenScreen(),
-      ),
+      GoRoute(path: '/register', builder: (c, s) => const RegisterScreen()),
+      GoRoute(path: '/forbidden', builder: (c, s) => const ForbiddenScreen()),
       GoRoute(path: '/', redirect: (_, _) => '/books'),
       ShellRoute(
         builder: (context, state, child) =>
